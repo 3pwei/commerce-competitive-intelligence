@@ -49,7 +49,10 @@ src/competitive_intelligence/   Python package
 tests/                          自動測試
 ```
 
+## 資料契約與產品設定
+
+現有 Google Sheet 的六張工作表已定義為版本化、大小寫敏感的資料契約；三項 Demo 產品的價格與 retailer URL 則集中於非敏感設定檔。詳見 [`docs/data-contracts.md`](docs/data-contracts.md)。此階段只載入與驗證本機設定，不連線或寫入 Google Sheets。
+
 ## 尚未實作
 
-Google Sheets schema 與商品設定、網頁擷取、retailer parsers、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。Google Sheets 既有 schema 將在後續工作中作為資料契約，但本 PR 不複製或實作該 schema。
-
+Google Sheets API 與實際寫入、網頁擷取、retailer parsers、fixtures、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。
