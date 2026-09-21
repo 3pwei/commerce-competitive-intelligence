@@ -1,3 +1,55 @@
 # Commerce Competitive Intelligence
 
-Repository initialized for the project foundation pull request.
+競品價格與評論分析的展示型專案，作為後續 Python 分析元件、可替換的外部服務 Adapter，以及 n8n 人工流程的共同工程基礎。
+
+## 專案定位
+
+- 這是 side-project Demo，不是正式資料平台或常駐服務。
+- n8n workflow 僅由使用者人工觸發，不建立自動排程。
+- 專案不使用 PostgreSQL、SQLite、Redis 或其他資料庫。
+- 此階段不會呼叫真實網站、付費 API、LLM、Google Sheets 或 Email 服務。
+
+## Python 與 n8n 的責任邊界
+
+Python 負責可測試的資料擷取介面、解析、正規化與分析邏輯；外部服務以 `Protocol`／Adapter 隔離，避免綁定單一爬蟲或 LLM 供應商。n8n 負責人工啟動、步驟編排、輸入輸出傳遞，以及未來的 Google Sheets 與 Email 串接，不承載核心分析規則。
+
+## Fixture 與 Live Capture 模式
+
+一般開發、測試與 CI 預設使用 `fixtures/` 中已清理且可公開的範例資料。未來若需要一次性 Live Capture，應由人工明確啟動並寫入被忽略的 `fixtures/live/`；資料經清理、去除敏感內容並完成審查後，才能成為版本控制內的 fixture。CI 永遠不執行 Live Capture。
+
+## 本機環境
+
+需要 Python 3.12：
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows PowerShell: .venv\\Scripts\\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+python -m competitive_intelligence --help
+```
+
+執行與 CI 相同的檢查：
+
+```bash
+ruff check .
+ruff format --check .
+mypy src
+pytest
+```
+
+## 目錄
+
+```text
+config/                         Demo 設定範例
+docs/                           設計與使用文件
+fixtures/                       已清理的測試資料
+n8n/workflows/                  後續可匯入的 workflow JSON
+src/competitive_intelligence/   Python package
+tests/                          自動測試
+```
+
+## 尚未實作
+
+Google Sheets schema 與商品設定、網頁擷取、retailer parsers、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。Google Sheets 既有 schema 將在後續工作中作為資料契約，但本 PR 不複製或實作該 schema。
+
