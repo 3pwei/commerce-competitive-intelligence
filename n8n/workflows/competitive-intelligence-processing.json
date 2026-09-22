@@ -1,0 +1,112 @@
+{
+  "id": "competitive-intelligence-processing-v1",
+  "name": "Competitive Intelligence — Processing Sub-workflow",
+  "nodes": [
+    {
+      "parameters": {"inputSource": "passthrough"},
+      "id": "subworkflow-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-1000, 0]
+    },
+    {
+      "parameters": {"command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence n8n-stage collect-product-pages --output-dir /demo-output"},
+      "id": "collect-product-pages",
+      "name": "Collect / Replay Product Pages",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [-780, 0]
+    },
+    {
+      "parameters": {"command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence n8n-stage parse-retailer-html --output-dir /demo-output"},
+      "id": "parse-retailer-html",
+      "name": "Parse Retailer HTML",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [-560, 0]
+    },
+    {
+      "parameters": {"command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence n8n-stage build-data-layers --output-dir /demo-output"},
+      "id": "build-data-layers",
+      "name": "Build STG / ODS / TGT",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [-340, 0]
+    },
+    {
+      "parameters": {"command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence n8n-stage collect-reviews --output-dir /demo-output"},
+      "id": "collect-reviews",
+      "name": "Collect / Replay Reviews",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [-120, 0]
+    },
+    {
+      "parameters": {"command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence n8n-stage analyze-reviews --provider mock --output-dir /demo-output"},
+      "id": "analyze-reviews",
+      "name": "Analyze Recent Reviews with LLM",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [100, 0]
+    },
+    {
+      "parameters": {"command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence n8n-stage apply-business-rules --output-dir /demo-output"},
+      "id": "apply-business-rules",
+      "name": "Apply Business Rules",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [320, 0]
+    },
+    {
+      "parameters": {"command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence n8n-stage generate-recommendations --provider mock --output-dir /demo-output"},
+      "id": "generate-recommendations",
+      "name": "Generate AI Recommendations",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [540, 0]
+    },
+    {
+      "parameters": {"command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence n8n-stage assemble-bundle --provider mock --output-dir /demo-output"},
+      "id": "assemble-bundle",
+      "name": "Assemble Demo Bundle",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [760, 0]
+    },
+    {
+      "parameters": {"fileSelector": "/demo-output/demo_bundle.json", "options": {}},
+      "id": "read-bundle",
+      "name": "Read Demo Bundle",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [980, 0]
+    },
+    {
+      "parameters": {"operation": "fromJson", "options": {}},
+      "id": "parse-bundle",
+      "name": "Parse Demo Bundle",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [1200, 0]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {"main": [[{"node": "Collect / Replay Product Pages", "type": "main", "index": 0}]]},
+    "Collect / Replay Product Pages": {"main": [[{"node": "Parse Retailer HTML", "type": "main", "index": 0}]]},
+    "Parse Retailer HTML": {"main": [[{"node": "Build STG / ODS / TGT", "type": "main", "index": 0}]]},
+    "Build STG / ODS / TGT": {"main": [[{"node": "Collect / Replay Reviews", "type": "main", "index": 0}]]},
+    "Collect / Replay Reviews": {"main": [[{"node": "Analyze Recent Reviews with LLM", "type": "main", "index": 0}]]},
+    "Analyze Recent Reviews with LLM": {"main": [[{"node": "Apply Business Rules", "type": "main", "index": 0}]]},
+    "Apply Business Rules": {"main": [[{"node": "Generate AI Recommendations", "type": "main", "index": 0}]]},
+    "Generate AI Recommendations": {"main": [[{"node": "Assemble Demo Bundle", "type": "main", "index": 0}]]},
+    "Assemble Demo Bundle": {"main": [[{"node": "Read Demo Bundle", "type": "main", "index": 0}]]},
+    "Read Demo Bundle": {"main": [[{"node": "Parse Demo Bundle", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "versionId": "64f52627-42cc-4bc4-8594-73af9db39a82",
+  "meta": {"templateCredsSetupCompleted": false},
+  "tags": []
+}

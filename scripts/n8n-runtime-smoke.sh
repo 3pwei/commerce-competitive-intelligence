@@ -1,12 +1,16 @@
 #!/bin/sh
 set -eu
 
-workflow=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-demo.json
+parent_workflow=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-demo.json
+processing_workflow=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-processing.json
+sheets_workflow=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-sheets.json
 result=/demo-output/runtime-execution.json
 
 mkdir -p /demo-output
 rm -f "$result"
-n8n import:workflow --input="$workflow"
+n8n import:workflow --input="$processing_workflow"
+n8n import:workflow --input="$sheets_workflow"
+n8n import:workflow --input="$parent_workflow"
 set +e
 n8n execute --id=competitive-intelligence-demo-v2 --rawOutput > "$result" 2>&1
 execution_status=$?
