@@ -13,6 +13,11 @@ from competitive_intelligence.comment_output import (
 )
 from competitive_intelligence.config import load_product_catalog
 from competitive_intelligence.pipeline import run_pipeline, write_outputs
+from competitive_intelligence.recommendations import (
+    MockRecommendationProvider,
+    build_recommendations,
+    write_recommendation_outputs,
+)
 from competitive_intelligence.reviews import (
     ConfiguredLLMProvider,
     FixtureReviewSource,
@@ -72,18 +77,44 @@ def build_parser() -> argparse.ArgumentParser:
     trend.add_argument("--config", type=Path, default=Path("config/products.example.json"))
     trend.add_argument("--rules", type=Path, default=Path("config/business-rules.v1.json"))
     trend.add_argument("--previous-tgt", type=Path)
+    recommendation = subparsers.add_parser(
+        "recommendations", help="Build evidence-bound Recent Suggestion outputs"
+    )
+    recommendation.add_argument("--trend", type=Path, required=True)
+    recommendation.add_argument("--events", type=Path, required=True)
+    recommendation.add_argument("--provider", choices=("mock", "configured"), default="mock")
+    recommendation.add_argument("--output-dir", type=Path, required=True)
+    recommendation.add_argument("--config", type=Path, default=Path("config/products.example.json"))
+    recommendation.add_argument("--comment-evidence", type=Path)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the placeholder CLI."""
     args = build_parser().parse_args(argv)
+    if args.command == "recommendations":
+        recommendation_provider = (
+            MockRecommendationProvider() if args.provider == "mock" else ConfiguredLLMProvider()
+        )
+        comment_evidence_path = args.comment_evidence or args.trend.with_name(
+            "comment_evidence.json"
+        )
+        recommendation_result = build_recommendations(
+            load_json_rows(args.trend),
+            load_json_rows(args.events),
+            load_product_catalog(args.config),
+            recommendation_provider,
+            comment_evidence=load_json_rows(comment_evidence_path),
+        )
+        write_recommendation_outputs(recommendation_result, args.output_dir)
+        print(recommendation_result.summary.model_dump_json(indent=2))
+        return 0
     if args.command == "overall-trend":
         run_seqn = load_artifact_seqn(args.tgt.with_name("run_summary.json"))
         comment_summary = args.comment.with_name("comment_summary.json")
         if comment_summary.exists() and load_artifact_seqn(comment_summary) != run_seqn:
             raise ValueError("TGT and Comment inputs must belong to the same SEQN")
-        result = analyze_trends(
+        trend_result = analyze_trends(
             load_target_rows(args.tgt),
             load_product_catalog(args.config),
             load_rule_config(args.rules),
@@ -92,13 +123,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             comment_evidence=load_json_rows(args.comment.with_name("comment_evidence.json")),
             previous_rows=load_target_rows(args.previous_tgt) if args.previous_tgt else None,
         )
-        write_trend_outputs(result, args.output_dir)
-        print(result.summary.model_dump_json(indent=2))
+        write_trend_outputs(trend_result, args.output_dir)
+        print(trend_result.summary.model_dump_json(indent=2))
         return 0
     if args.command == "comment-output":
         catalog = load_product_catalog(args.config)
-        provider = MockLLMProvider() if args.provider == "mock" else ConfiguredLLMProvider()
-        analyses = run_review_analysis(catalog, FixtureReviewSource(args.fixtures), provider)
+        review_provider = MockLLMProvider() if args.provider == "mock" else ConfiguredLLMProvider()
+        analyses = run_review_analysis(catalog, FixtureReviewSource(args.fixtures), review_provider)
         seqn = load_seqn_from_run_summary(args.run_summary) if args.run_summary else args.seqn
         comment_result = transform_comment_output(analyses, catalog, seqn=seqn)
         write_comment_outputs(comment_result, args.output_dir)
@@ -106,8 +137,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if args.command == "reviews":
         catalog = load_product_catalog(args.config)
-        provider = MockLLMProvider() if args.provider == "mock" else ConfiguredLLMProvider()
-        analyses = run_review_analysis(catalog, FixtureReviewSource(args.fixtures), provider)
+        review_provider = MockLLMProvider() if args.provider == "mock" else ConfiguredLLMProvider()
+        analyses = run_review_analysis(catalog, FixtureReviewSource(args.fixtures), review_provider)
         print(json.dumps([item.model_dump(mode="json") for item in analyses], indent=2))
         return 0
     if args.command == "pipeline":
