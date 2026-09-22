@@ -7,6 +7,7 @@ from pathlib import Path
 
 from competitive_intelligence.capture import capture_live, replay
 from competitive_intelligence.config import load_product_catalog
+from competitive_intelligence.pipeline import run_pipeline, write_outputs
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -23,12 +24,27 @@ def build_parser() -> argparse.ArgumentParser:
         "--fixtures", type=Path, default=Path("fixtures/product-pages/manifest.json")
     )
     capture.add_argument("--live-output", type=Path, default=Path("fixtures/live"))
+    pipeline = subparsers.add_parser("pipeline", help="Build offline STG/ODS/TGT outputs")
+    pipeline.add_argument("--mode", choices=("fixture",), default="fixture")
+    pipeline.add_argument("--config", type=Path, default=Path("config/products.example.json"))
+    pipeline.add_argument(
+        "--fixtures", type=Path, default=Path("fixtures/product-pages/manifest.json")
+    )
+    pipeline.add_argument("--output-dir", type=Path, required=True)
+    pipeline.add_argument("--format", choices=("json", "csv", "both"), default="json")
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the placeholder CLI."""
     args = build_parser().parse_args(argv)
+    if args.command == "pipeline":
+        observations = replay(args.fixtures)
+        catalog = load_product_catalog(args.config)
+        result = run_pipeline(observations, catalog)
+        write_outputs(result, args.output_dir, args.format)
+        print(result.summary.model_dump_json(indent=2))
+        return 0
     if args.command != "capture":
         return 0
     if args.mode == "fixture":
