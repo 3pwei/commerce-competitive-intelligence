@@ -1,35 +1,53 @@
-# n8n Demo Integration
+# n8n 2.x Demo Integration
 
-Import `n8n/workflows/competitive-intelligence-demo.json` into a self-hosted n8n instance. The
-workflow has a Manual Trigger only. Its editable **Select Demo Options** node defaults to fixture,
-mock provider, dry run enabled, Sheets disabled, Email disabled, and a blank recipient.
+## Supported runtime
 
-## Setup
+- Docker Desktop 4.x using Linux containers and Docker Compose v2
+- n8n `2.4.4` (`n8nio/n8n:2.4.4`, never `latest`)
+- Python 3.12-compatible project runtime installed in the custom image
+- Windows 10/11 PowerShell as the documented host shell
 
-1. Install this project and its Python dependencies where n8n executes commands.
-2. Set `projectDir` in **Select Demo Options** to the repository's absolute path.
-3. Set `GOOGLE_SHEET_URL` in the n8n runtime environment; no Sheet ID is stored in the workflow.
-4. Assign a Google Sheets OAuth2 credential to all Google Sheets nodes. Do not export it into Git.
-5. Assign a Gmail OAuth2 credential to **Optional Gmail Send**.
-6. Keep the recipient blank until sending is intentionally enabled.
+`Dockerfile.n8n` installs Python and the project at `/opt/competitive-intelligence`.
+`compose.yaml` mounts persistent n8n state at `/home/node/.n8n` and Demo artifacts at
+`/demo-output`. The matching host directory is `output/n8n`.
 
-The workflow calls `python -m competitive_intelligence demo-run`. Python owns capture replay,
-normalization, rules, LLM validation, Sheet contracts, and email rendering. n8n validates the bundle
-again, checks STG for the SEQN, appends the six datasets in order, and optionally sends the email.
+## Safe offline flow
 
-## Safe first run
+The imported workflow has one Manual Trigger and no Schedule/Cron trigger. Its n8n 2.x Set node
+stores `fixtureMode`, `mockLlm`, and `dryRun` as actual `true` Booleans, and `writeSheets` and
+`sendEmail` as actual `false` Booleans. It does not read environment variables from a Code node.
 
-Run with defaults. It must reach **Run Summary** without contacting Google or Gmail. Inspect
-`output/demo/demo_bundle.json` and the Email preview. Then enable `writeSheets` and disable `dryRun`
-for a deliberate Sheet write. A repeated SEQN is rejected before the first append; existing rows are
-never cleared. Email requires dry run off, `sendEmail` enabled, and a non-blank recipient.
+```text
+Manual Trigger -> Select Demo Options -> Execute Python Demo Pipeline
+-> Validate Output Bundle -> Sheets Dry-Run -> Build Email Preview -> Execution Summary
+```
 
-If validation, duplicate protection, or an append fails, n8n stops that path and exposes the failing
-node. Later writes and Gmail are not configured to continue on error.
+The fixed command runs from `/opt/competitive-intelligence` and writes to `/demo-output`. The
+default path does not call Google, Gmail, an LLM, or retailer sites and requires no credentials.
 
-## Offline contract validation
+## Execute Command boundary
 
-CI parses the exported JSON, requires exactly one Manual Trigger, rejects Schedule/Cron nodes and
-embedded credentials, Email addresses, Sheet IDs, or API keys, and checks that the execute-command
-arguments remain compatible with the Python `demo-run` CLI. The default dry-run path is exercised
-without Google Sheets or Gmail access.
+n8n 2.x excludes Execute Command and local-file nodes by default. This local-only image enables the
+two nodes required by the Demo through an explicit `NODES_EXCLUDE` setting while continuing to
+exclude `Local File Trigger`. It does not use `NODES_EXCLUDE=[]`.
+
+Execute Command is limited by the fixed workflow command, fixed working directory, non-root `node`
+user, bundled fixtures, and dedicated output mount. Do not expose this Demo instance to untrusted
+users or the public internet. This configuration is not a production deployment.
+
+## Import and execution
+
+The smoke service imports the workflow and executes its deterministic ID inside the custom image:
+
+```text
+n8n import:workflow --input=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-demo.json
+n8n execute --id=competitive-intelligence-demo-v2 --rawOutput
+```
+
+It then validates the six Sheet JSON files against the Python contracts, checks row counts,
+confirms the Email preview, records the n8n execution ID/status, and writes
+`output/n8n/runtime-smoke-report.json`.
+
+Google Sheets and Gmail nodes remain optional and inactive in the default dry-run route. Configuring
+real delivery requires a separate security review, explicit credentials, and deliberate workflow
+changes; it is outside the local acceptance path.

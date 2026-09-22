@@ -67,11 +67,26 @@ def test_exported_workflow_is_manual_safe_and_credential_free() -> None:
     assert "credentials" not in serialized
     assert "@gmail.com" not in serialized
     assert not re.search(r"docs\.google\.com/spreadsheets/d/[A-Za-z0-9_-]+", serialized)
-    assert "$env.GOOGLE_SHEET_URL" in serialized
-    assert "dryRun" in serialized and '"booleanValue": true' in serialized
+    assert "$env" not in serialized
+    options = next(node for node in nodes if node["name"] == "Select Demo Options")
+    assignments = {
+        item["name"]: item for item in options["parameters"]["assignments"]["assignments"]
+    }
+    for name, expected in {
+        "fixtureMode": True,
+        "mockLlm": True,
+        "dryRun": True,
+        "writeSheets": False,
+        "sendEmail": False,
+    }.items():
+        assert assignments[name]["type"] == "boolean"
+        assert assignments[name]["value"] is expected
     assert "writeSheets" in serialized and "sendEmail" in serialized
     assert "Duplicate SEQN Guard" in serialized
     assert "Validate Output Bundle" in serialized
+    assert "Sheets Dry-Run" in serialized
+    assert "Build Email Preview" in serialized
+    assert "Execution Summary" in serialized
 
 
 def test_workflow_command_matches_demo_cli_contract() -> None:
@@ -86,9 +101,10 @@ def test_workflow_command_matches_demo_cli_contract() -> None:
         "--mode",
         "--provider",
         "--output-dir",
-        "--sheet-url",
     ):
         assert token in command
+    assert command.startswith("cd /opt/competitive-intelligence")
+    assert "/demo-output" in command
     args = build_parser().parse_args(
         [
             "demo-run",

@@ -1,0 +1,22 @@
+FROM n8nio/n8n:2.4.4
+
+USER root
+
+RUN apk add --no-cache python3 py3-pip \
+    && python3 -m pip install --no-cache-dir --break-system-packages --upgrade pip setuptools 
+
+WORKDIR /opt/competitive-intelligence
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+COPY config ./config
+COPY fixtures ./fixtures
+COPY scripts ./scripts
+COPY n8n ./n8n
+
+RUN python3 -m pip install --no-cache-dir --break-system-packages . \
+    && mkdir -p /demo-output /home/node/.n8n \
+    && chown -R node:node /opt/competitive-intelligence /demo-output /home/node/.n8n
+
+USER node
+WORKDIR /opt/competitive-intelligence
+

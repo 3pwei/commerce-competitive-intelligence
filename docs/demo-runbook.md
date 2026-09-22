@@ -1,92 +1,106 @@
 # Demo Runbook
 
-## 1. Install and verify
+## Prerequisites
 
-Use Python 3.12 from the repository root:
+- Windows 10/11
+- Docker Desktop 4.x configured for Linux containers
+- Docker Compose v2 (`docker compose version`)
+- Git
 
-```bash
-python --version
-python -m venv .venv
-source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-python -m competitive_intelligence --help
+The supported image is pinned to `n8nio/n8n:2.4.4`. Python and all application dependencies are
+installed while the custom image is built. No `.env`, API key, Google account, paid service, or
+manual installation inside the container is required.
+
+All commands below run in Windows PowerShell from the repository root.
+
+## Start
+
+```powershell
+docker compose up --build -d n8n
 ```
 
-No `.env`, API key, Google account, paid service, or external API is required for the safe path.
+Open `http://localhost:5678`. The named volume `n8n_data` holds n8n state; `output\\n8n` receives
+Demo artifacts.
 
-## 2. Run the offline Demo
+## Import and run the offline workflow
 
-```bash
-python -m competitive_intelligence demo-run \
-  --mode fixture --provider mock --output-dir output/demo
+The runtime smoke command performs the one-time import and real n8n execution automatically:
+
+```powershell
+docker compose --profile test run --rm n8n-smoke
 ```
 
-This is the fixture/mock/dry-run flow. It replays nine synthetic product pages and sanitized review
-fixtures, executes every Python stage, and performs contract validation before writing artifacts.
+For import only:
 
-## 3. Inspect the outputs
+```powershell
+docker compose exec n8n n8n import:workflow --input=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-demo.json
+```
 
-Confirm these files exist:
+No workflow field needs to be repaired in the UI. The smoke run uses fixture mode, mock LLM,
+dry-run Sheets, and Email preview only. It contacts no Google, Gmail, LLM, or retailer API.
+
+To demonstrate the Manual Trigger in the UI after importing, open **Competitive Intelligence —
+Manual Demo** and select **Execute Workflow**. The successful node path ends at **Execution
+Summary**.
+
+## Inspect outputs
+
+```powershell
+Get-Content .\\output\\n8n\\runtime-smoke-report.json
+Get-Content .\\output\\n8n\\validation_report.json
+Start-Process .\\output\\n8n\\email_preview.html
+Get-ChildItem .\\output\\n8n\\sheets
+```
+
+Required artifacts include:
 
 ```text
-output/demo/demo_bundle.json
-output/demo/run_summary.json
-output/demo/validation_report.json
-output/demo/detected_events.json
-output/demo/email_preview.html
-output/demo/email_preview.txt
-output/demo/sheets/{stg,ods,tgt,comment,overall_trend,recent_suggestion}.{json,csv}
+output/n8n/runtime-execution.json
+output/n8n/runtime-smoke-report.json
+output/n8n/demo_bundle.json
+output/n8n/run_summary.json
+output/n8n/validation_report.json
+output/n8n/email_preview.html
+output/n8n/sheets/{stg,ods,tgt,comment,overall_trend,recent_suggestion}.{json,csv}
 ```
 
-`validation_report.json` must contain `"status": "passed"`. Its six row counts must match
-`run_summary.json`. Open `email_preview.html` locally to review the message without sending it.
-The committed [`../examples/demo`](../examples/demo) directory is the sanitized reference run.
+Both report files must say `passed`; the runtime report must say workflow status `completed`.
 
-## 4. Import and run n8n
+## Logs and lifecycle
 
-1. Import `n8n/workflows/competitive-intelligence-demo.json` into self-hosted n8n.
-2. Open **Select Demo Options** and set `projectDir` to the checkout path used by n8n.
-3. Keep `mode=fixture`, `provider=mock`, `dryRun=true`, `writeSheets=false`, and `sendEmail=false`.
-4. Select **Execute Workflow** from the Manual Trigger.
-5. Inspect **Validate Output Bundle**, **Email Preview**, and **Run Summary**.
+```powershell
+# Logs
+docker compose logs -f n8n
 
-The safe run does not reach Google Sheets or Gmail.
+# Stop containers but retain n8n_data and host output
+docker compose down
 
-## 5. Optional Google Sheets and Gmail
+# Restart with existing data
+docker compose up -d n8n
 
-Only after the dry-run succeeds:
-
-1. Create a spreadsheet containing the six exact tab names from `config/sheet-schema.v1.json`.
-2. Set `GOOGLE_SHEET_URL` in the n8n runtime; do not paste a Sheet ID into the workflow export.
-3. Assign Google Sheets OAuth2 credentials to every Sheets node in the n8n UI.
-4. Set `dryRun=false` and `writeSheets=true`; keep Email disabled for the first write.
-5. Confirm all six appends and the final SEQN guard result.
-6. Assign Gmail OAuth2 credentials, enter an intended recipient, and then set `sendEmail=true`.
-
-The workflow never clears rows. Reusing an existing SEQN is rejected before the first append.
-
-## 6. Optional one-time live capture
-
-```bash
-python -m competitive_intelligence capture --mode live
+# Fully remove containers and persistent n8n data
+docker compose down --volumes --remove-orphans
+Remove-Item -Recurse -Force .\\output\\n8n
 ```
 
-Live capture is not part of the public Demo. Raw results stay under the Git-ignored `fixtures/live/`.
-Review legality and retailer terms, sanitize content, remove identifiers, and obtain approval before
-turning any capture into a committed fixture.
+The final two commands are destructive. The `Remove-Item` command deletes generated Demo evidence,
+but does not modify fixtures or source files.
 
-## Troubleshooting and recovery
+## Troubleshooting
 
-| Symptom | Likely cause | Recovery |
+| Symptom | Check | Recovery |
 |---|---|---|
-| `python` is not 3.12 | Wrong interpreter | Recreate `.venv` with Python 3.12 |
-| Import/module error | Package not installed | Run `python -m pip install -e ".[dev]"` |
-| Contract/header failure | Sheet schema or artifact drift | Restore the v1 manifest; do not rename columns |
-| Cross-sheet reconciliation failure | Inputs from different runs | Delete `output/demo` and rerun once |
-| n8n command fails | Incorrect `projectDir` or Python environment | Use the checkout path visible to n8n and install the package there |
-| Duplicate SEQN | Batch already appended | Inspect the existing STG rows; do not bypass the guard |
-| Sheets/Gmail auth error | Missing or expired OAuth credential | Reconnect only in n8n; never export credentials |
-| Partial Sheet append | External failure after validation | Stop Email, inspect the SEQN across all tabs, remove only that partial batch manually, then rerun |
+| Port 5678 is already used | `docker compose ps` | Stop the conflicting local service or change the host-side port |
+| Image build fails | Docker Desktop engine and network access | Restart Docker Desktop and rerun `docker compose build --pull n8n` |
+| Workflow is duplicated | Previous import remains in `n8n_data` | Use the existing imported workflow; the smoke run remains safe |
+| Execute Command is unknown | Wrong image/compose configuration | Confirm image tag `2.4.4` and start through this Compose file |
+| Python module is missing | A stock n8n image was started | Rebuild with `Dockerfile.n8n`; do not install packages manually |
+| Validation fails | Mixed or stale generated outputs | Remove only `output\\n8n`, then rerun the smoke command |
 
-For a clean local retry, remove only the generated `output/demo` directory and run the offline
-command again. Never delete or overwrite an external Sheet as an automated recovery step.
+## Security and deployment boundary
+
+Execute Command can run local processes and is enabled only for this isolated, local Demo. The
+container runs as the non-root `node` user, uses a fixed command/path, keeps environment access from
+Code nodes blocked, and leaves `Local File Trigger` excluded. Do not publish port 5678 to the public
+internet and do not treat this Compose setup as Production. Scheduling, live crawling, configured
+LLM calls, Google Sheets writes, Gmail sending, and Production deployment are outside this runbook.
