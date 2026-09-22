@@ -8,6 +8,12 @@ from pathlib import Path
 from competitive_intelligence.capture import capture_live, replay
 from competitive_intelligence.config import load_product_catalog
 from competitive_intelligence.pipeline import run_pipeline, write_outputs
+from competitive_intelligence.reviews import (
+    ConfiguredLLMProvider,
+    FixtureReviewSource,
+    MockLLMProvider,
+    run_review_analysis,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -32,12 +38,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pipeline.add_argument("--output-dir", type=Path, required=True)
     pipeline.add_argument("--format", choices=("json", "csv", "both"), default="json")
+    reviews = subparsers.add_parser("reviews", help="Analyze normalized Amazon reviews")
+    reviews.add_argument("--mode", choices=("fixture",), default="fixture")
+    reviews.add_argument("--provider", choices=("mock", "configured"), default="mock")
+    reviews.add_argument("--config", type=Path, default=Path("config/products.example.json"))
+    reviews.add_argument("--fixtures", type=Path, default=Path("fixtures/reviews/manifest.json"))
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the placeholder CLI."""
     args = build_parser().parse_args(argv)
+    if args.command == "reviews":
+        catalog = load_product_catalog(args.config)
+        provider = MockLLMProvider() if args.provider == "mock" else ConfiguredLLMProvider()
+        analyses = run_review_analysis(catalog, FixtureReviewSource(args.fixtures), provider)
+        print(json.dumps([item.model_dump(mode="json") for item in analyses], indent=2))
+        return 0
     if args.command == "pipeline":
         observations = replay(args.fixtures)
         catalog = load_product_catalog(args.config)

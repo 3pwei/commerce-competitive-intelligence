@@ -10,3 +10,5 @@ python -m competitive_intelligence capture --mode fixture
 
 `live/` is ignored. Never commit raw pages, cookies, tokens, credentials, or personal
 data. See `docs/capture-and-replay.md` before promoting reviewed evidence.
+`reviews/` contains sanitized, synthetic Amazon review fixtures for the three configured Demo
+products. They contain no account data, cookies, reviewer names, or other personal information.
