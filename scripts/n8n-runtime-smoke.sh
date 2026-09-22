@@ -11,6 +11,7 @@ rm -f "$result"
 n8n import:workflow --input="$processing_workflow"
 n8n import:workflow --input="$sheets_workflow"
 n8n import:workflow --input="$parent_workflow"
+n8n publish:workflow --id=competitive-intelligence-processing-v1
 set +e
 n8n execute --id=competitive-intelligence-demo-v2 --rawOutput > "$result" 2>&1
 execution_status=$?
