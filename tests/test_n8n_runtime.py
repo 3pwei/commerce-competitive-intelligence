@@ -15,6 +15,7 @@ def test_compose_pins_runtime_and_limits_high_risk_nodes() -> None:
     assert "n8nio/n8n:2.4.4" in dockerfile
     assert "python3" in dockerfile
     assert 'N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"' in compose
+    assert 'N8N_RESTRICT_FILE_ACCESS_TO: "/demo-output"' in compose
     assert "n8n-nodes-base.localFileTrigger" in compose
     assert "NODES_EXCLUDE: '[]'" not in compose
     assert "n8n_data:/home/node/.n8n" in compose

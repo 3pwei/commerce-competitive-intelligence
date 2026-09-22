@@ -33,7 +33,8 @@ exclude `Local File Trigger`. It does not use `NODES_EXCLUDE=[]`.
 
 Execute Command is limited by the fixed workflow command, fixed working directory, non-root `node`
 user, bundled fixtures, and dedicated output mount. Do not expose this Demo instance to untrusted
-users or the public internet. This configuration is not a production deployment.
+users or the public internet. File-node access is explicitly restricted to `/demo-output`. This
+configuration is not a production deployment.
 
 ## Import and execution
 
