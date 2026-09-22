@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "sheets": {
+    "STG": ["Item Number", "Product Name", "Vendor", "Base Price", "Final Price", "Stock Status", "Timestamp", "SEQN"],
+    "ODS": ["Item Number", "Product Name", "Vendor", "Base Price", "Final Price", "Stock Status", "Timestamp", "SEQN"],
+    "TGT": ["Item Number", "Product Name", "Vendor", "Base Price", "Final Price", "My price", "Recent Stock", "Current Stock", "Timestamp"],
+    "Comment": ["Product Name", "Vendor", "Pros1", "Pros2", "Pros3", "Cons1", "Cons2", "Cons3", "Summary"],
+    "Overall Trend": ["Product Name", "Vendor", "Overall Trend", "Observation"],
+    "Recent Suggestion": ["Product Name", "Vendor", "Suggestion"]
+  }
+}
