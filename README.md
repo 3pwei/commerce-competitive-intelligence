@@ -65,6 +65,17 @@ tests/                          自動測試
 
 `PageFetcher` 將 direct HTTP、未來 browser／scraping API 與離線 fixture 隔離；Amazon、Walmart、Best Buy parser 只處理傳入的 HTML，依 JSON-LD、meta、retailer DOM 的順序抽取證據，不執行 JavaScript，也不猜測缺失的價格或庫存。CI 僅使用最小 synthetic HTML。
 
+## STG / ODS / TGT 離線管線
+
+Fixture replay 可直接轉換為符合既有 Sheet schema 的 STG、ODS 與 TGT JSON/CSV 檔案；
+流程會驗證、正規化、去除完全重複資料並保留 rejected audit，不連線 Google Sheets：
+
+```bash
+python -m competitive_intelligence pipeline --mode fixture --output-dir output/demo
+```
+
+完整規則與對帳方式見 [`docs/data-pipeline.md`](docs/data-pipeline.md)。
+
 ## 尚未實作
 
 Google Sheets API 與實際寫入、評論擷取、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。
