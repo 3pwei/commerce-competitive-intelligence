@@ -84,6 +84,7 @@ def test_exported_workflow_is_manual_safe_and_credential_free() -> None:
     assert "writeSheets" in serialized and "sendEmail" in serialized
     assert "Duplicate SEQN Guard" in serialized
     assert "Validate Output Bundle" in serialized
+    assert "const b=$json.data" in serialized
     assert "Sheets Dry-Run" in serialized
     assert "Build Email Preview" in serialized
     assert "Execution Summary" in serialized
