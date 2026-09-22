@@ -1,0 +1,17 @@
+[
+  {
+    "Product Name": "Sony WH-1000XM5 (Black)",
+    "Vendor": "bestbuy",
+    "Suggestion": "[high] inventory response: Review inventory availability and the corresponding merchandising plan. Rationale: The action is bounded to the deterministic events supplied by PR #8. Limitations: Synthetic demo inputs; verify current conditions before acting."
+  },
+  {
+    "Product Name": "Apple AirPods Pro 2",
+    "Vendor": "amazon",
+    "Suggestion": "[medium] pricing review: Review the current price position; require human approval for any change. Rationale: The action is bounded to the deterministic events supplied by PR #8. Limitations: Synthetic demo inputs; verify current conditions before acting."
+  },
+  {
+    "Product Name": "Bose QuietComfort (Black)",
+    "Vendor": "amazon",
+    "Suggestion": "[medium] pricing review: Review the current price position; require human approval for any change. Rationale: The action is bounded to the deterministic events supplied by PR #8. Limitations: Synthetic demo inputs; verify current conditions before acting."
+  }
+]

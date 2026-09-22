@@ -1,0 +1,35 @@
+[
+  {
+    "Product Name": "Apple AirPods Pro 2",
+    "Vendor": "amazon",
+    "Pros1": "Overall product satisfaction",
+    "Pros2": "",
+    "Pros3": "",
+    "Cons1": "Reported product drawbacks",
+    "Cons2": "Battery or charging concerns",
+    "Cons3": "",
+    "Summary": "Analyzed 6 normalized Amazon reviews with evidence-linked findings."
+  },
+  {
+    "Product Name": "Sony WH-1000XM5 (Black)",
+    "Vendor": "amazon",
+    "Pros1": "Overall product satisfaction",
+    "Pros2": "",
+    "Pros3": "",
+    "Cons1": "Reported product drawbacks",
+    "Cons2": "Connection reliability concerns",
+    "Cons3": "",
+    "Summary": "Analyzed 6 normalized Amazon reviews with evidence-linked findings."
+  },
+  {
+    "Product Name": "Bose QuietComfort (Black)",
+    "Vendor": "amazon",
+    "Pros1": "Overall product satisfaction",
+    "Pros2": "",
+    "Pros3": "",
+    "Cons1": "Reported product drawbacks",
+    "Cons2": "Fit or comfort concerns",
+    "Cons3": "",
+    "Summary": "Analyzed 6 normalized Amazon reviews with evidence-linked findings."
+  }
+]

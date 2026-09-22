@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Commerce Competitive Intelligence offline demo summary</title>
+  <desc id="desc">A sanitized portfolio card showing six validated sheets and an offline fixture to recommendation flow.</desc>
+  <rect width="1200" height="630" fill="#f7f9fc"/>
+  <rect x="54" y="48" width="1092" height="534" rx="28" fill="#ffffff" stroke="#dce3ec" stroke-width="2"/>
+  <text x="96" y="110" fill="#172033" font-family="Arial, sans-serif" font-size="34" font-weight="700">Commerce Competitive Intelligence</text>
+  <text x="96" y="146" fill="#596579" font-family="Arial, sans-serif" font-size="19">Offline fixture · deterministic mock · dry-run delivery</text>
+  <rect x="920" y="88" width="166" height="46" rx="23" fill="#e7f8ef"/>
+  <circle cx="950" cy="111" r="8" fill="#1f9d63"/>
+  <text x="970" y="118" fill="#16734a" font-family="Arial, sans-serif" font-size="18" font-weight="700">VALIDATED</text>
+  <g font-family="Arial, sans-serif">
+    <rect x="96" y="195" width="156" height="108" rx="18" fill="#edf4ff"/>
+    <text x="116" y="228" fill="#52627a" font-size="17">STG</text><text x="116" y="274" fill="#2056a8" font-size="38" font-weight="700">9</text>
+    <rect x="270" y="195" width="156" height="108" rx="18" fill="#edf4ff"/>
+    <text x="290" y="228" fill="#52627a" font-size="17">ODS</text><text x="290" y="274" fill="#2056a8" font-size="38" font-weight="700">9</text>
+    <rect x="444" y="195" width="156" height="108" rx="18" fill="#edf4ff"/>
+    <text x="464" y="228" fill="#52627a" font-size="17">TGT</text><text x="464" y="274" fill="#2056a8" font-size="38" font-weight="700">9</text>
+    <rect x="618" y="195" width="156" height="108" rx="18" fill="#fff4e7"/>
+    <text x="638" y="228" fill="#52627a" font-size="17">Comment</text><text x="638" y="274" fill="#a85b20" font-size="38" font-weight="700">3</text>
+    <rect x="792" y="195" width="156" height="108" rx="18" fill="#fff4e7"/>
+    <text x="812" y="228" fill="#52627a" font-size="17">Overall Trend</text><text x="812" y="274" fill="#a85b20" font-size="38" font-weight="700">9</text>
+    <rect x="966" y="195" width="120" height="108" rx="18" fill="#eaf8f2"/>
+    <text x="986" y="226" fill="#52627a" font-size="14">Suggestions</text><text x="986" y="274" fill="#16734a" font-size="38" font-weight="700">3</text>
+  </g>
+  <path d="M110 381 H1080" stroke="#dce3ec" stroke-width="2"/>
+  <g font-family="Arial, sans-serif" font-size="18" text-anchor="middle">
+    <rect x="96" y="421" width="172" height="62" rx="16" fill="#172033"/><text x="182" y="459" fill="#fff">Public fixtures</text>
+    <path d="M276 452 H322" stroke="#8ca0ba" stroke-width="3"/><path d="M316 444 L326 452 L316 460" fill="none" stroke="#8ca0ba" stroke-width="3"/>
+    <rect x="334" y="421" width="172" height="62" rx="16" fill="#245ba7"/><text x="420" y="459" fill="#fff">Python pipeline</text>
+    <path d="M514 452 H560" stroke="#8ca0ba" stroke-width="3"/><path d="M554 444 L564 452 L554 460" fill="none" stroke="#8ca0ba" stroke-width="3"/>
+    <rect x="572" y="421" width="172" height="62" rx="16" fill="#d17732"/><text x="658" y="459" fill="#fff">Rules + mock AI</text>
+    <path d="M752 452 H798" stroke="#8ca0ba" stroke-width="3"/><path d="M792 444 L802 452 L792 460" fill="none" stroke="#8ca0ba" stroke-width="3"/>
+    <rect x="810" y="421" width="276" height="62" rx="16" fill="#16855a"/><text x="948" y="459" fill="#fff">Sheets + Email preview</text>
+  </g>
+  <text x="96" y="535" fill="#596579" font-family="Arial, sans-serif" font-size="17">10 detected events · 0 rejected rows · no credentials · no external API</text>
+</svg>

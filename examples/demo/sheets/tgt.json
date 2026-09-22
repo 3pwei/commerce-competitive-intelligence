@@ -1,0 +1,101 @@
+[
+  {
+    "Item Number": "apple-airpods-pro-2",
+    "Product Name": "Apple AirPods Pro 2",
+    "Vendor": "amazon",
+    "Base Price": "249.00",
+    "Final Price": "189.99",
+    "My price": "249.00",
+    "Recent Stock": "In Stock",
+    "Current Stock": "In Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  },
+  {
+    "Item Number": "apple-airpods-pro-2",
+    "Product Name": "Apple AirPods Pro 2",
+    "Vendor": "bestbuy",
+    "Base Price": "249.99",
+    "Final Price": "199.99",
+    "My price": "249.00",
+    "Recent Stock": "In Stock",
+    "Current Stock": "In Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  },
+  {
+    "Item Number": "apple-airpods-pro-2",
+    "Product Name": "Apple AirPods Pro 2",
+    "Vendor": "walmart",
+    "Base Price": "249.00",
+    "Final Price": "199.00",
+    "My price": "249.00",
+    "Recent Stock": "In Stock",
+    "Current Stock": "In Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  },
+  {
+    "Item Number": "bose-quietcomfort-black",
+    "Product Name": "Bose QuietComfort (Black)",
+    "Vendor": "amazon",
+    "Base Price": "429.00",
+    "Final Price": "349.00",
+    "My price": "429.00",
+    "Recent Stock": "In Stock",
+    "Current Stock": "In Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  },
+  {
+    "Item Number": "bose-quietcomfort-black",
+    "Product Name": "Bose QuietComfort (Black)",
+    "Vendor": "bestbuy",
+    "Base Price": "429.99",
+    "Final Price": "349.99",
+    "My price": "429.00",
+    "Recent Stock": "In Stock",
+    "Current Stock": "In Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  },
+  {
+    "Item Number": "bose-quietcomfort-black",
+    "Product Name": "Bose QuietComfort (Black)",
+    "Vendor": "walmart",
+    "Base Price": "429.00",
+    "Final Price": "359.00",
+    "My price": "429.00",
+    "Recent Stock": "In Stock",
+    "Current Stock": "In Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  },
+  {
+    "Item Number": "sony-wh-1000xm5-black",
+    "Product Name": "Sony WH-1000XM5 (Black)",
+    "Vendor": "amazon",
+    "Base Price": "399.99",
+    "Final Price": "348.00",
+    "My price": "328.00",
+    "Recent Stock": "In Stock",
+    "Current Stock": "In Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  },
+  {
+    "Item Number": "sony-wh-1000xm5-black",
+    "Product Name": "Sony WH-1000XM5 (Black)",
+    "Vendor": "bestbuy",
+    "Base Price": "399.99",
+    "Final Price": "349.99",
+    "My price": "328.00",
+    "Recent Stock": "Out of Stock",
+    "Current Stock": "Out of Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  },
+  {
+    "Item Number": "sony-wh-1000xm5-black",
+    "Product Name": "Sony WH-1000XM5 (Black)",
+    "Vendor": "walmart",
+    "Base Price": "399.99",
+    "Final Price": "349.00",
+    "My price": "328.00",
+    "Recent Stock": "In Stock",
+    "Current Stock": "In Stock",
+    "Timestamp": "2026-09-22T00:00:00Z"
+  }
+]

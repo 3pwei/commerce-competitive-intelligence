@@ -1,0 +1,56 @@
+[
+  {
+    "Product Name": "Apple AirPods Pro 2",
+    "Vendor": "amazon",
+    "Overall Trend": "COMPETITOR_PRICE_LOWER | LOWEST_COMPETITOR",
+    "Observation": "COMPETITOR_PRICE_LOWER; LOWEST_COMPETITOR"
+  },
+  {
+    "Product Name": "Apple AirPods Pro 2",
+    "Vendor": "bestbuy",
+    "Overall Trend": "COMPETITOR_PRICE_LOWER",
+    "Observation": "COMPETITOR_PRICE_LOWER"
+  },
+  {
+    "Product Name": "Apple AirPods Pro 2",
+    "Vendor": "walmart",
+    "Overall Trend": "COMPETITOR_PRICE_LOWER",
+    "Observation": "COMPETITOR_PRICE_LOWER"
+  },
+  {
+    "Product Name": "Bose QuietComfort (Black)",
+    "Vendor": "amazon",
+    "Overall Trend": "COMPETITOR_PRICE_LOWER | LOWEST_COMPETITOR",
+    "Observation": "COMPETITOR_PRICE_LOWER; LOWEST_COMPETITOR"
+  },
+  {
+    "Product Name": "Bose QuietComfort (Black)",
+    "Vendor": "bestbuy",
+    "Overall Trend": "COMPETITOR_PRICE_LOWER",
+    "Observation": "COMPETITOR_PRICE_LOWER"
+  },
+  {
+    "Product Name": "Bose QuietComfort (Black)",
+    "Vendor": "walmart",
+    "Overall Trend": "COMPETITOR_PRICE_LOWER",
+    "Observation": "COMPETITOR_PRICE_LOWER"
+  },
+  {
+    "Product Name": "Sony WH-1000XM5 (Black)",
+    "Vendor": "amazon",
+    "Overall Trend": "LOWEST_COMPETITOR",
+    "Observation": "LOWEST_COMPETITOR"
+  },
+  {
+    "Product Name": "Sony WH-1000XM5 (Black)",
+    "Vendor": "bestbuy",
+    "Overall Trend": "OUT_OF_STOCK",
+    "Observation": "OUT_OF_STOCK"
+  },
+  {
+    "Product Name": "Sony WH-1000XM5 (Black)",
+    "Vendor": "walmart",
+    "Overall Trend": "CURRENT_SNAPSHOT",
+    "Observation": "No rule-triggered event"
+  }
+]
