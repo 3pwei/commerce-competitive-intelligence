@@ -19,6 +19,14 @@ from competitive_intelligence.reviews import (
     MockLLMProvider,
     run_review_analysis,
 )
+from competitive_intelligence.trends import (
+    analyze_trends,
+    load_artifact_seqn,
+    load_json_rows,
+    load_rule_config,
+    load_target_rows,
+    write_trend_outputs,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -57,12 +65,36 @@ def build_parser() -> argparse.ArgumentParser:
     seqn_group = comment.add_mutually_exclusive_group()
     seqn_group.add_argument("--seqn")
     seqn_group.add_argument("--run-summary", type=Path)
+    trend = subparsers.add_parser("overall-trend", help="Build deterministic Overall Trend outputs")
+    trend.add_argument("--tgt", type=Path, required=True)
+    trend.add_argument("--comment", type=Path, required=True)
+    trend.add_argument("--output-dir", type=Path, required=True)
+    trend.add_argument("--config", type=Path, default=Path("config/products.example.json"))
+    trend.add_argument("--rules", type=Path, default=Path("config/business-rules.v1.json"))
+    trend.add_argument("--previous-tgt", type=Path)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the placeholder CLI."""
     args = build_parser().parse_args(argv)
+    if args.command == "overall-trend":
+        run_seqn = load_artifact_seqn(args.tgt.with_name("run_summary.json"))
+        comment_summary = args.comment.with_name("comment_summary.json")
+        if comment_summary.exists() and load_artifact_seqn(comment_summary) != run_seqn:
+            raise ValueError("TGT and Comment inputs must belong to the same SEQN")
+        result = analyze_trends(
+            load_target_rows(args.tgt),
+            load_product_catalog(args.config),
+            load_rule_config(args.rules),
+            seqn=run_seqn,
+            comment_rows=load_json_rows(args.comment),
+            comment_evidence=load_json_rows(args.comment.with_name("comment_evidence.json")),
+            previous_rows=load_target_rows(args.previous_tgt) if args.previous_tgt else None,
+        )
+        write_trend_outputs(result, args.output_dir)
+        print(result.summary.model_dump_json(indent=2))
+        return 0
     if args.command == "comment-output":
         catalog = load_product_catalog(args.config)
         provider = MockLLMProvider() if args.provider == "mock" else ConfiguredLLMProvider()
