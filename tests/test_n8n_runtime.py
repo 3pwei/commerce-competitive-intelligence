@@ -22,6 +22,15 @@ def test_compose_pins_runtime_and_limits_high_risk_nodes() -> None:
     assert "./output/n8n:/demo-output" in compose
 
 
+def test_container_shell_scripts_are_forced_to_lf() -> None:
+    attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+    assert "*.sh text eol=lf" in attributes
+    shell_scripts = list(ROOT.rglob("*.sh"))
+    assert shell_scripts
+    for script in shell_scripts:
+        assert b"\r\n" not in script.read_bytes(), f"{script} contains CRLF line endings"
+
+
 def test_runtime_validator_checks_real_outputs(tmp_path: Path) -> None:
     assert main(["demo-run", "--output-dir", str(tmp_path)]) == 0
     execution = tmp_path / "runtime-execution.json"
