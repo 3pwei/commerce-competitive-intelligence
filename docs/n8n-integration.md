@@ -8,9 +8,10 @@ mock provider, dry run enabled, Sheets disabled, Email disabled, and a blank rec
 
 1. Install this project and its Python dependencies where n8n executes commands.
 2. Set `projectDir` in **Select Demo Options** to the repository's absolute path.
-3. Assign a Google Sheets OAuth2 credential to all Google Sheets nodes. Do not export it into Git.
-4. Assign a Gmail OAuth2 credential to **Optional Gmail Send**.
-5. Keep the recipient blank until sending is intentionally enabled.
+3. Set `GOOGLE_SHEET_URL` in the n8n runtime environment; no Sheet ID is stored in the workflow.
+4. Assign a Google Sheets OAuth2 credential to all Google Sheets nodes. Do not export it into Git.
+5. Assign a Gmail OAuth2 credential to **Optional Gmail Send**.
+6. Keep the recipient blank until sending is intentionally enabled.
 
 The workflow calls `python -m competitive_intelligence demo-run`. Python owns capture replay,
 normalization, rules, LLM validation, Sheet contracts, and email rendering. n8n validates the bundle
@@ -25,3 +26,10 @@ never cleared. Email requires dry run off, `sendEmail` enabled, and a non-blank 
 
 If validation, duplicate protection, or an append fails, n8n stops that path and exposes the failing
 node. Later writes and Gmail are not configured to continue on error.
+
+## Offline contract validation
+
+CI parses the exported JSON, requires exactly one Manual Trigger, rejects Schedule/Cron nodes and
+embedded credentials, Email addresses, Sheet IDs, or API keys, and checks that the execute-command
+arguments remain compatible with the Python `demo-run` CLI. The default dry-run path is exercised
+without Google Sheets or Gmail access.

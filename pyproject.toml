@@ -16,7 +16,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "mypy>=1.11,<2",
+  "pip-audit>=2.7,<3",
   "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
   "ruff>=0.8,<1",
 ]
 
@@ -41,3 +43,11 @@ files = ["src"]
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["competitive_intelligence"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = true

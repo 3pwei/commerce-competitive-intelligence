@@ -100,7 +100,8 @@ def build_parser() -> argparse.ArgumentParser:
     demo.add_argument("--live-output", type=Path, default=Path("fixtures/live"))
     demo.add_argument(
         "--sheet-url",
-        default="https://docs.google.com/spreadsheets/d/1mQbLChrt8DkusDTki5WBfr_IGmK3xF8IaDspM3zCV60/edit",
+        default="",
+        help="Optional Google Sheet URL used only in the email preview",
     )
     return parser
 

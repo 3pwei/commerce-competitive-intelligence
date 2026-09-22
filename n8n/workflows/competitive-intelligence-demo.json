@@ -20,7 +20,7 @@
             {"id": "sendEmail", "name": "sendEmail", "type": "boolean", "value": false},
             {"id": "recipient", "name": "recipient", "type": "string", "value": ""},
             {"id": "projectDir", "name": "projectDir", "type": "string", "value": "={{ $env.PROJECT_DIR }}"},
-            {"id": "sheetUrl", "name": "sheetUrl", "type": "string", "value": "https://docs.google.com/spreadsheets/d/1mQbLChrt8DkusDTki5WBfr_IGmK3xF8IaDspM3zCV60/edit"}
+            {"id": "sheetUrl", "name": "sheetUrl", "type": "string", "value": "={{ $env.GOOGLE_SHEET_URL }}"}
           ]
         },
         "options": {}

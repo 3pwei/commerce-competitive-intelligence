@@ -11,6 +11,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -28,6 +29,13 @@ jobs:
       - name: Mypy
         run: mypy src
       - name: Pytest
-        run: pytest
-      - name: Offline fixture replay
-        run: python -m competitive_intelligence capture --mode fixture >/dev/null
+        run: pytest --cov=competitive_intelligence --cov-report=term-missing --cov-report=xml --cov-fail-under=85
+      - name: Dependency vulnerability scan
+        run: python -m pip_audit .
+      - name: Offline end-to-end demo
+        env:
+          NO_PROXY: "*"
+          no_proxy: "*"
+        run: python -m competitive_intelligence demo-run --mode fixture --provider mock --output-dir output/ci
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
