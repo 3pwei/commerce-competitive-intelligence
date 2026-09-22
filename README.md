@@ -109,6 +109,20 @@ python -m competitive_intelligence overall-trend \
 `Overall Trend` schema 的 JSON/CSV 與事件 sidecar；不呼叫 scraper、LLM 或 Google Sheets。
 規則與追溯欄位見 [`docs/business-rules.md`](docs/business-rules.md)。
 
+## AI 營運建議
+
+```bash
+python -m competitive_intelligence recommendations \
+  --trend output/demo/overall_trend.json \
+  --events output/demo/detected_events.json \
+  --provider mock \
+  --output-dir output/demo
+```
+
+此命令只根據 PR #8 已確認的事件產生人工作業建議，輸出符合 `Recent Suggestion`
+schema 的 JSON/CSV 及 evidence/summary sidecar。Mock 模式完全離線且可重現；任何建議
+都不會直接調價、通知或修改外部系統。詳見 [`docs/recommendations.md`](docs/recommendations.md)。
+
 ## 尚未實作
 
-Google Sheets API 與實際寫入、AI 營運建議、n8n workflow、Email、部署及任何排程均留待後續 PR。
+Google Sheets API 與實際寫入、n8n workflow、Email、部署及任何排程均留待後續 PR。
