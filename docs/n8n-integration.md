@@ -18,12 +18,33 @@ stores `fixtureMode`, `mockLlm`, and `dryRun` as actual `true` Booleans, and `wr
 `sendEmail` as actual `false` Booleans. It does not read environment variables from a Code node.
 
 ```text
-Manual Trigger -> Select Demo Options -> Execute Python Demo Pipeline
--> Validate Output Bundle -> Sheets Dry-Run -> Build Email Preview -> Execution Summary
+Parent: Manual Trigger -> Select Demo Options -> Execute Intelligence Pipeline
+        -> Validate Output Bundle -> Dry Run or Sheets Disabled
+        -> Sheets Dry-Run / Write Six Google Sheets
+        -> Build Email Preview -> Execution Summary
+
+Processing sub-workflow:
+When Executed by Another Workflow
+-> Collect / Replay Product Pages
+-> Parse Retailer HTML
+-> Build STG / ODS / TGT
+-> Collect / Replay Reviews
+-> Analyze Recent Reviews with LLM
+-> Apply Business Rules
+-> Generate AI Recommendations
+-> Assemble Demo Bundle -> Read Demo Bundle -> Parse Demo Bundle
+
+Google Sheets delivery sub-workflow:
+When Executed by Another Workflow -> Read Existing STG SEQN -> Duplicate SEQN Guard
+-> Prepare / Write STG -> Prepare / Write ODS -> Prepare / Write TGT
+-> Prepare / Write Comment -> Prepare / Write Overall Trend
+-> Prepare / Write Recent Suggestion -> Return Validated Bundle
 ```
 
-The fixed command runs from `/opt/competitive-intelligence` and writes to `/demo-output`. The
-default path does not call Google, Gmail, an LLM, or retailer sites and requires no credentials.
+Each named processing node executes one `n8n-stage` CLI command and writes a durable artifact under
+`/demo-output/stages`. The next node consumes that artifact, so no all-in-one pipeline or visual-only
+checkpoint remains. The default path does not call Google, Gmail, an external LLM, or retailer sites
+and requires no credentials. It uses saved HTML/review fixtures and the deterministic mock LLM.
 
 ## Execute Command boundary
 
@@ -38,9 +59,12 @@ configuration is not a production deployment.
 
 ## Import and execution
 
-The smoke service imports the workflow and executes its deterministic ID inside the custom image:
+The smoke service imports the processing workflow first, imports the parent second, and executes the
+parent's deterministic ID inside the custom image:
 
 ```text
+n8n import:workflow --input=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-processing.json
+n8n import:workflow --input=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-sheets.json
 n8n import:workflow --input=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-demo.json
 n8n execute --id=competitive-intelligence-demo-v2 --rawOutput
 ```

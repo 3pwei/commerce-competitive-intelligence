@@ -33,6 +33,8 @@ docker compose --profile test run --rm n8n-smoke
 For import only:
 
 ```powershell
+docker compose exec n8n n8n import:workflow --input=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-processing.json
+docker compose exec n8n n8n import:workflow --input=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-sheets.json
 docker compose exec n8n n8n import:workflow --input=/opt/competitive-intelligence/n8n/workflows/competitive-intelligence-demo.json
 ```
 

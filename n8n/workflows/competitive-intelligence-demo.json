@@ -33,32 +33,20 @@
     },
     {
       "parameters": {
-        "command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence demo-run --mode fixture --provider mock --output-dir /demo-output"
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "competitive-intelligence-processing-v1",
+          "mode": "id"
+        },
+        "workflowInputs": {"mappingMode": "defineBelow", "value": {}},
+        "options": {"waitForSubWorkflow": true}
       },
-      "id": "execute-pipeline",
-      "name": "Execute Python Demo Pipeline",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
+      "id": "execute-intelligence-subworkflow",
+      "name": "Execute Intelligence Pipeline",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [-760, 0]
-    },
-    {
-      "parameters": {
-        "fileSelector": "/demo-output/demo_bundle.json",
-        "options": {}
-      },
-      "id": "read-bundle",
-      "name": "Read Demo Bundle",
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [-540, 0]
-    },
-    {
-      "parameters": {"operation": "fromJson", "options": {}},
-      "id": "extract-bundle",
-      "name": "Parse Demo Bundle",
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1,
-      "position": [-320, 0]
     },
     {
       "parameters": {
@@ -83,121 +71,16 @@
     },
     {
       "parameters": {
-        "documentId": {"__rl": true, "mode": "url", "value": "={{ $json.options.sheetUrl }}"},
-        "sheetName": {"__rl": true, "mode": "name", "value": "STG"},
-        "options": {}
+        "source": "database",
+        "workflowId": {"__rl": true, "value": "competitive-intelligence-sheets-v1", "mode": "id"},
+        "workflowInputs": {"mappingMode": "defineBelow", "value": {}},
+        "options": {"waitForSubWorkflow": true}
       },
-      "id": "read-existing-seqn",
-      "name": "Read Existing STG SEQN",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
+      "id": "write-six-sheets-subworkflow",
+      "name": "Write Six Google Sheets",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
       "position": [340, 140]
-    },
-    {
-      "parameters": {
-        "jsCode": "const b=$('Validate Output Bundle').first().json; const duplicate=$input.all().some(i=>String(i.json.SEQN||'')===String(b.seqn)); if(duplicate) throw new Error(`Duplicate SEQN ${b.seqn}; no rows written`); return [{json:b}];"
-      },
-      "id": "duplicate-guard",
-      "name": "Duplicate SEQN Guard",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [560, 140]
-    },
-    {
-      "parameters": {"jsCode": "return $('Validate Output Bundle').first().json.stg_rows.map(json=>({json}));"},
-      "id": "prepare-stg",
-      "name": "Prepare STG Rows",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [780, 140]
-    },
-    {
-      "parameters": {"operation": "append", "documentId": {"__rl": true, "mode": "url", "value": "={{ $('Select Demo Options').first().json.sheetUrl }}"}, "sheetName": {"__rl": true, "mode": "name", "value": "STG"}, "columns": {"mappingMode": "autoMapInputData", "value": {}}, "options": {}},
-      "id": "write-stg",
-      "name": "Write STG",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [1000, 140]
-    },
-    {
-      "parameters": {"jsCode": "return $('Validate Output Bundle').first().json.ods_rows.map(json=>({json}));"},
-      "id": "prepare-ods",
-      "name": "Prepare ODS Rows",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1220, 140]
-    },
-    {
-      "parameters": {"operation": "append", "documentId": {"__rl": true, "mode": "url", "value": "={{ $('Select Demo Options').first().json.sheetUrl }}"}, "sheetName": {"__rl": true, "mode": "name", "value": "ODS"}, "columns": {"mappingMode": "autoMapInputData", "value": {}}, "options": {}},
-      "id": "write-ods",
-      "name": "Write ODS",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [1440, 140]
-    },
-    {
-      "parameters": {"jsCode": "return $('Validate Output Bundle').first().json.tgt_rows.map(json=>({json}));"},
-      "id": "prepare-tgt",
-      "name": "Prepare TGT Rows",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1660, 140]
-    },
-    {
-      "parameters": {"operation": "append", "documentId": {"__rl": true, "mode": "url", "value": "={{ $('Select Demo Options').first().json.sheetUrl }}"}, "sheetName": {"__rl": true, "mode": "name", "value": "TGT"}, "columns": {"mappingMode": "autoMapInputData", "value": {}}, "options": {}},
-      "id": "write-tgt",
-      "name": "Write TGT",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [1880, 140]
-    },
-    {
-      "parameters": {"jsCode": "return $('Validate Output Bundle').first().json.comment_rows.map(json=>({json}));"},
-      "id": "prepare-comment",
-      "name": "Prepare Comment Rows",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2100, 140]
-    },
-    {
-      "parameters": {"operation": "append", "documentId": {"__rl": true, "mode": "url", "value": "={{ $('Select Demo Options').first().json.sheetUrl }}"}, "sheetName": {"__rl": true, "mode": "name", "value": "Comment"}, "columns": {"mappingMode": "autoMapInputData", "value": {}}, "options": {}},
-      "id": "write-comment",
-      "name": "Write Comment",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [2320, 140]
-    },
-    {
-      "parameters": {"jsCode": "return $('Validate Output Bundle').first().json.overall_trend_rows.map(json=>({json}));"},
-      "id": "prepare-trend",
-      "name": "Prepare Overall Trend Rows",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2540, 140]
-    },
-    {
-      "parameters": {"operation": "append", "documentId": {"__rl": true, "mode": "url", "value": "={{ $('Select Demo Options').first().json.sheetUrl }}"}, "sheetName": {"__rl": true, "mode": "name", "value": "Overall Trend"}, "columns": {"mappingMode": "autoMapInputData", "value": {}}, "options": {}},
-      "id": "write-trend",
-      "name": "Write Overall Trend",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [2760, 140]
-    },
-    {
-      "parameters": {"jsCode": "return $('Validate Output Bundle').first().json.recent_suggestion_rows.map(json=>({json}));"},
-      "id": "prepare-suggestion",
-      "name": "Prepare Recent Suggestion Rows",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2980, 140]
-    },
-    {
-      "parameters": {"operation": "append", "documentId": {"__rl": true, "mode": "url", "value": "={{ $('Select Demo Options').first().json.sheetUrl }}"}, "sheetName": {"__rl": true, "mode": "name", "value": "Recent Suggestion"}, "columns": {"mappingMode": "autoMapInputData", "value": {}}, "options": {}},
-      "id": "write-suggestion",
-      "name": "Write Recent Suggestion",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [3200, 140]
     },
     {
       "parameters": {"jsCode": "const b=$('Validate Output Bundle').first().json; return [{json:{...b,sheetsDryRun:{status:'validated',writeAttempted:false,sheetRows:b.run_summary.sheet_row_counts}}}];"},
@@ -243,27 +126,12 @@
   "pinData": {},
   "connections": {
     "Manual Trigger": {"main": [[{"node": "Select Demo Options", "type": "main", "index": 0}]]},
-    "Select Demo Options": {"main": [[{"node": "Execute Python Demo Pipeline", "type": "main", "index": 0}]]},
-    "Execute Python Demo Pipeline": {"main": [[{"node": "Read Demo Bundle", "type": "main", "index": 0}]]},
-    "Read Demo Bundle": {"main": [[{"node": "Parse Demo Bundle", "type": "main", "index": 0}]]},
-    "Parse Demo Bundle": {"main": [[{"node": "Validate Output Bundle", "type": "main", "index": 0}]]},
+    "Select Demo Options": {"main": [[{"node": "Execute Intelligence Pipeline", "type": "main", "index": 0}]]},
+    "Execute Intelligence Pipeline": {"main": [[{"node": "Validate Output Bundle", "type": "main", "index": 0}]]},
     "Validate Output Bundle": {"main": [[{"node": "Dry Run or Sheets Disabled", "type": "main", "index": 0}]]},
-    "Dry Run or Sheets Disabled": {"main": [[{"node": "Sheets Dry-Run", "type": "main", "index": 0}], [{"node": "Read Existing STG SEQN", "type": "main", "index": 0}]]},
+    "Dry Run or Sheets Disabled": {"main": [[{"node": "Sheets Dry-Run", "type": "main", "index": 0}], [{"node": "Write Six Google Sheets", "type": "main", "index": 0}]]},
     "Sheets Dry-Run": {"main": [[{"node": "Build Email Preview", "type": "main", "index": 0}]]},
-    "Read Existing STG SEQN": {"main": [[{"node": "Duplicate SEQN Guard", "type": "main", "index": 0}]]},
-    "Duplicate SEQN Guard": {"main": [[{"node": "Prepare STG Rows", "type": "main", "index": 0}]]},
-    "Prepare STG Rows": {"main": [[{"node": "Write STG", "type": "main", "index": 0}]]},
-    "Write STG": {"main": [[{"node": "Prepare ODS Rows", "type": "main", "index": 0}]]},
-    "Prepare ODS Rows": {"main": [[{"node": "Write ODS", "type": "main", "index": 0}]]},
-    "Write ODS": {"main": [[{"node": "Prepare TGT Rows", "type": "main", "index": 0}]]},
-    "Prepare TGT Rows": {"main": [[{"node": "Write TGT", "type": "main", "index": 0}]]},
-    "Write TGT": {"main": [[{"node": "Prepare Comment Rows", "type": "main", "index": 0}]]},
-    "Prepare Comment Rows": {"main": [[{"node": "Write Comment", "type": "main", "index": 0}]]},
-    "Write Comment": {"main": [[{"node": "Prepare Overall Trend Rows", "type": "main", "index": 0}]]},
-    "Prepare Overall Trend Rows": {"main": [[{"node": "Write Overall Trend", "type": "main", "index": 0}]]},
-    "Write Overall Trend": {"main": [[{"node": "Prepare Recent Suggestion Rows", "type": "main", "index": 0}]]},
-    "Prepare Recent Suggestion Rows": {"main": [[{"node": "Write Recent Suggestion", "type": "main", "index": 0}]]},
-    "Write Recent Suggestion": {"main": [[{"node": "Build Email Preview", "type": "main", "index": 0}]]},
+    "Write Six Google Sheets": {"main": [[{"node": "Build Email Preview", "type": "main", "index": 0}]]},
     "Build Email Preview": {"main": [[{"node": "Email Enabled and Recipient Present", "type": "main", "index": 0}]]},
     "Email Enabled and Recipient Present": {"main": [[{"node": "Optional Gmail Send", "type": "main", "index": 0}], [{"node": "Execution Summary", "type": "main", "index": 0}]]},
     "Optional Gmail Send": {"main": [[{"node": "Execution Summary", "type": "main", "index": 0}]]}

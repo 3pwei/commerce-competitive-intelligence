@@ -12,6 +12,8 @@ from competitive_intelligence.demo import validate_bundle
 
 ROOT = Path(__file__).parents[1]
 WORKFLOW = ROOT / "n8n/workflows/competitive-intelligence-demo.json"
+PROCESSING_WORKFLOW = ROOT / "n8n/workflows/competitive-intelligence-processing.json"
+SHEETS_WORKFLOW = ROOT / "n8n/workflows/competitive-intelligence-sheets.json"
 FIXTURES = ROOT / "fixtures"
 
 
@@ -82,7 +84,7 @@ def test_exported_workflow_is_manual_safe_and_credential_free() -> None:
         assert assignments[name]["type"] == "boolean"
         assert assignments[name]["value"] is expected
     assert "writeSheets" in serialized and "sendEmail" in serialized
-    assert "Duplicate SEQN Guard" in serialized
+    assert "Write Six Google Sheets" in serialized
     assert "Validate Output Bundle" in serialized
     assert "const b=$json.data" in serialized
     assert "Sheets Dry-Run" in serialized
@@ -90,37 +92,110 @@ def test_exported_workflow_is_manual_safe_and_credential_free() -> None:
     assert "Execution Summary" in serialized
 
 
-def test_workflow_command_matches_demo_cli_contract() -> None:
+def test_parent_workflow_calls_real_processing_subworkflow() -> None:
     workflow = json.loads(WORKFLOW.read_text(encoding="utf-8"))
-    command = next(
-        node["parameters"]["command"]
-        for node in workflow["nodes"]
-        if node["name"] == "Execute Python Demo Pipeline"
+    nodes = {node["name"]: node for node in workflow["nodes"]}
+    assert "Execute Python Demo Pipeline" not in nodes
+    assert "Execute Intelligence Pipeline" in nodes
+    node = nodes["Execute Intelligence Pipeline"]
+    assert node["type"] == "n8n-nodes-base.executeWorkflow"
+    assert node["parameters"]["workflowId"]["value"] == ("competitive-intelligence-processing-v1")
+    assert workflow["connections"]["Execute Intelligence Pipeline"]["main"][0][0]["node"] == (
+        "Validate Output Bundle"
     )
-    for token in (
-        "demo-run",
-        "--mode",
-        "--provider",
-        "--output-dir",
-    ):
-        assert token in command
-    assert command.startswith("cd /opt/competitive-intelligence")
-    assert "/demo-output" in command
+    sheets_node = nodes["Write Six Google Sheets"]
+    assert sheets_node["type"] == "n8n-nodes-base.executeWorkflow"
+    assert sheets_node["parameters"]["workflowId"]["value"] == (
+        "competitive-intelligence-sheets-v1"
+    )
+
+
+def test_processing_subworkflow_executes_each_business_stage_once() -> None:
+    workflow = json.loads(PROCESSING_WORKFLOW.read_text(encoding="utf-8"))
+    nodes = {node["name"]: node for node in workflow["nodes"]}
+    expected = (
+        "Collect / Replay Product Pages",
+        "Parse Retailer HTML",
+        "Build STG / ODS / TGT",
+        "Collect / Replay Reviews",
+        "Analyze Recent Reviews with LLM",
+        "Apply Business Rules",
+        "Generate AI Recommendations",
+    )
+    for name in expected:
+        node = nodes[name]
+        assert node["type"] == "n8n-nodes-base.executeCommand"
+        assert " n8n-stage " in node["parameters"]["command"]
+
+    serialized = PROCESSING_WORKFLOW.read_text(encoding="utf-8")
+    assert "Execute Python Demo Pipeline" not in serialized
+    assert "checkpoint" not in serialized.lower()
+    assert "n8n-nodes-base.executeWorkflowTrigger" in serialized
+    assert "credentials" not in serialized
+    assert not any(
+        trigger in node["type"].lower()
+        for node in workflow["nodes"]
+        for trigger in ("schedule", "cron")
+    )
+
+    connections = workflow["connections"]
+    previous = "When Executed by Another Workflow"
+    for name in expected:
+        assert connections[previous]["main"][0][0]["node"] == name
+        previous = name
+    assert connections[previous]["main"][0][0]["node"] == "Assemble Demo Bundle"
+
+
+def test_sheets_delivery_is_isolated_in_subworkflow() -> None:
+    parent = json.loads(WORKFLOW.read_text(encoding="utf-8"))
+    sheets = json.loads(SHEETS_WORKFLOW.read_text(encoding="utf-8"))
+    parent_types = {node["type"] for node in parent["nodes"]}
+    assert "n8n-nodes-base.googleSheets" not in parent_types
+    assert [node["type"] for node in sheets["nodes"]].count("n8n-nodes-base.googleSheets") == 7
+    names = {node["name"] for node in sheets["nodes"]}
+    assert "Read Existing STG SEQN" in names
+    assert "Duplicate SEQN Guard" in names
+    assert "Write Recent Suggestion" in names
+    assert "Return Validated Bundle" in names
+    serialized = SHEETS_WORKFLOW.read_text(encoding="utf-8")
+    assert "credentials" not in serialized
+    assert "docs.google.com/spreadsheets/d/" not in serialized
+
+
+def test_n8n_stage_cli_contract() -> None:
     args = build_parser().parse_args(
         [
-            "demo-run",
-            "--mode",
-            "fixture",
+            "n8n-stage",
+            "analyze-reviews",
             "--provider",
             "mock",
             "--output-dir",
             "output/demo",
-            "--sheet-url",
-            "",
         ]
     )
-    assert args.mode == "fixture"
+    assert args.stage == "analyze-reviews"
     assert args.provider == "mock"
+
+
+def test_n8n_stages_produce_same_validated_bundle(tmp_path: Path) -> None:
+    stages = (
+        "collect-product-pages",
+        "parse-retailer-html",
+        "build-data-layers",
+        "collect-reviews",
+        "analyze-reviews",
+        "apply-business-rules",
+        "generate-recommendations",
+        "assemble-bundle",
+    )
+    for stage in stages:
+        assert main(["n8n-stage", stage, "--output-dir", str(tmp_path)]) == 0
+    payload = json.loads((tmp_path / "demo_bundle.json").read_text(encoding="utf-8"))
+    assert payload["seqn"] == payload["run_summary"]["seqn"]
+    assert payload["stg_rows"]
+    assert payload["comment_rows"]
+    assert payload["recent_suggestion_rows"]
+    assert json.loads((tmp_path / "validation_report.json").read_text())["status"] == "passed"
 
 
 def test_fixtures_contain_no_delivery_identifiers_or_credentials() -> None:

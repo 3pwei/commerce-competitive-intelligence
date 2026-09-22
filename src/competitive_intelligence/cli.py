@@ -25,6 +25,7 @@ from competitive_intelligence.reviews import (
     MockLLMProvider,
     run_review_analysis,
 )
+from competitive_intelligence.staged_demo import run_n8n_stage
 from competitive_intelligence.trends import (
     analyze_trends,
     load_artifact_seqn,
@@ -103,12 +104,40 @@ def build_parser() -> argparse.ArgumentParser:
         default="",
         help="Optional Google Sheet URL used only in the email preview",
     )
+    n8n_stage = subparsers.add_parser(
+        "n8n-stage", help="Execute one file-backed stage for the n8n sub-workflow"
+    )
+    n8n_stage.add_argument(
+        "stage",
+        choices=(
+            "collect-product-pages",
+            "parse-retailer-html",
+            "build-data-layers",
+            "collect-reviews",
+            "analyze-reviews",
+            "apply-business-rules",
+            "generate-recommendations",
+            "assemble-bundle",
+        ),
+    )
+    n8n_stage.add_argument("--output-dir", type=Path, required=True)
+    n8n_stage.add_argument("--provider", choices=("mock", "configured"), default="mock")
+    n8n_stage.add_argument("--sheet-url", default="")
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the placeholder CLI."""
     args = build_parser().parse_args(argv)
+    if args.command == "n8n-stage":
+        result = run_n8n_stage(
+            args.stage,
+            args.output_dir,
+            provider=args.provider,
+            sheet_url=args.sheet_url,
+        )
+        print(json.dumps(result, indent=2))
+        return 0
     if args.command == "demo-run":
         bundle = run_demo(
             mode=args.mode,
