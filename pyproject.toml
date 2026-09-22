@@ -9,6 +9,7 @@ description = "Demo foundation for competitive pricing and review analysis."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+  "beautifulsoup4>=4.12,<5",
   "pydantic>=2.10,<3",
 ]
 
