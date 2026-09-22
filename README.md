@@ -53,6 +53,10 @@ tests/                          自動測試
 
 現有 Google Sheet 的六張工作表已定義為版本化、大小寫敏感的資料契約；三項 Demo 產品的價格與 retailer URL 則集中於非敏感設定檔。詳見 [`docs/data-contracts.md`](docs/data-contracts.md)。此階段只載入與驗證本機設定，不連線或寫入 Google Sheets。
 
+## 網頁擷取與解析邊界
+
+`PageFetcher` 將 direct HTTP、未來 browser／scraping API 與離線 fixture 隔離；Amazon、Walmart、Best Buy parser 只處理傳入的 HTML，依 JSON-LD、meta、retailer DOM 的順序抽取證據，不執行 JavaScript，也不猜測缺失的價格或庫存。CI 僅使用最小 synthetic HTML。
+
 ## 尚未實作
 
-Google Sheets API 與實際寫入、網頁擷取、retailer parsers、fixtures、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。
+Google Sheets API 與實際寫入、正式網站擷取、完整 fixtures、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。
