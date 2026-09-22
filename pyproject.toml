@@ -21,7 +21,7 @@ Documentation = "https://github.com/3pwei/commerce-competitive-intelligence#read
 
 [project.optional-dependencies]
 dev = [
-  "mypy>=1.11,<2",
+  "mypy>=1.11,<3",
   "pip-audit>=2.7,<3",
   "pytest>=8.3,<9",
   "pytest-cov>=6,<7",
