@@ -40,11 +40,25 @@ python -m competitive_intelligence --help
 執行與 CI 相同的檢查：
 
 ```bash
-ruff check .
-ruff format --check .
-mypy src
-pytest
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy src
+python -m pytest --cov=competitive_intelligence --cov-report=term-missing --cov-fail-under=85
+python -m pip_audit .
 ```
+
+CI 僅使用 Python 3.12，於 pull request 與 `master` push 執行 lint、format、type check、
+完整測試、85% coverage gate、dependency audit 與 secret scan。測試以全域 socket guard
+禁止網路連線；端到端驗證固定使用 fixture + mock，不需要 repository secrets，也不呼叫
+真實 retailer、LLM、Google Sheets 或 Gmail。
+
+## 安全限制
+
+- `.env`、credentials、本機資料、live capture 與執行產物均由 `.gitignore` 排除。
+- fixture 必須是 synthetic／sanitized，不得含 token、Email、Sheet ID 或真實識別資訊。
+- n8n JSON 只保留 Manual Trigger；Sheet URL 從 `GOOGLE_SHEET_URL` 環境變數注入。
+- Google Sheets 與 Gmail credentials 只能在 n8n 執行環境中設定，不得匯出至版本庫。
+- Dependabot 僅追蹤 Python 與 GitHub Actions dependencies。
 
 ## 目錄
 

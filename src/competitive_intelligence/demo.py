@@ -96,11 +96,26 @@ def validate_bundle(bundle: DemoBundle) -> None:
     payload = bundle.model_dump(mode="json")
     for sheet_name, key in SHEET_KEYS.items():
         rows = payload[key]
+        if not rows:
+            raise ValueError(f"{sheet_name} must contain at least one demo row")
         validate_sheet_rows(sheet_name, rows)
         if bundle.run_summary.sheet_row_counts[sheet_name] != len(rows):
             raise ValueError(f"{sheet_name} row count does not reconcile")
     if any(row.get("SEQN") != bundle.seqn for row in bundle.stg_rows + bundle.ods_rows):
         raise ValueError("STG/ODS rows must use the bundle SEQN")
+
+    def identity(row: Mapping[str, Any]) -> tuple[str, str]:
+        return str(row["Product Name"]), str(row["Vendor"])
+
+    ods_keys = {identity(row) for row in bundle.ods_rows}
+    tgt_keys = {identity(row) for row in bundle.tgt_rows}
+    trend_keys = {identity(row) for row in bundle.overall_trend_rows}
+    if ods_keys != tgt_keys or tgt_keys != trend_keys:
+        raise ValueError("ODS, TGT, and Overall Trend identities do not reconcile")
+    if not {identity(row) for row in bundle.comment_rows}.issubset(tgt_keys):
+        raise ValueError("Comment identities must exist in TGT")
+    if not {identity(row) for row in bundle.recent_suggestion_rows}.issubset(tgt_keys):
+        raise ValueError("Recent Suggestion identities must exist in TGT")
 
 
 def _event_lines(events: Sequence[Mapping[str, Any]]) -> list[str]:
@@ -160,10 +175,11 @@ def build_email(
         html_parts.append(f"<h2>{html.escape(title)}</h2><ul>")
         html_parts.extend(f"<li>{html.escape(line)}</li>" for line in lines)
         html_parts.append("</ul>")
-    text_parts.append(f"\nGoogle Sheet: {sheet_url}")
-    html_parts.append(
-        f'<p><a href="{html.escape(sheet_url, quote=True)}">Open Google Sheet</a></p>'
-    )
+    if sheet_url:
+        text_parts.append(f"\nGoogle Sheet: {sheet_url}")
+        html_parts.append(
+            f'<p><a href="{html.escape(sheet_url, quote=True)}">Open Google Sheet</a></p>'
+        )
     return EmailContent(
         subject=f"Competitive intelligence demo — {seqn}",
         text="\n".join(text_parts),
@@ -180,7 +196,7 @@ def run_demo(
     review_fixtures: Path = Path("fixtures/reviews/manifest.json"),
     rules: Path = Path("config/business-rules.v1.json"),
     live_output: Path = Path("fixtures/live"),
-    sheet_url: str = "https://docs.google.com/spreadsheets/d/1mQbLChrt8DkusDTki5WBfr_IGmK3xF8IaDspM3zCV60/edit",
+    sheet_url: str = "",
 ) -> DemoBundle:
     """Execute all Python business stages and return one validated bundle."""
     catalog = load_product_catalog(product_config)

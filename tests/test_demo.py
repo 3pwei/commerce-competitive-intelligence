@@ -1,16 +1,18 @@
 """End-to-end demo bundle and offline n8n validation tests."""
 
 import json
+import re
 from pathlib import Path
 
 import pytest
 
-from competitive_intelligence.cli import main
+from competitive_intelligence.cli import build_parser, main
 from competitive_intelligence.contracts import SHEET_MODELS, sheet_headers
 from competitive_intelligence.demo import validate_bundle
 
 ROOT = Path(__file__).parents[1]
 WORKFLOW = ROOT / "n8n/workflows/competitive-intelligence-demo.json"
+FIXTURES = ROOT / "fixtures"
 
 
 def test_demo_run_writes_one_reconciled_bundle(tmp_path: Path, capsys) -> None:
@@ -49,13 +51,107 @@ def test_bundle_validation_rejects_header_drift(tmp_path: Path) -> None:
 def test_exported_workflow_is_manual_safe_and_credential_free() -> None:
     workflow = json.loads(WORKFLOW.read_text(encoding="utf-8"))
     nodes = workflow["nodes"]
-    types = {node["type"] for node in nodes}
     serialized = WORKFLOW.read_text(encoding="utf-8")
-    assert "n8n-nodes-base.manualTrigger" in types
-    assert not any("schedule" in node["type"].lower() for node in nodes)
+    assert [node["type"] for node in nodes].count("n8n-nodes-base.manualTrigger") == 1
+    assert not any(
+        trigger in node["type"].lower() for node in nodes for trigger in ("schedule", "cron")
+    )
     assert "credentials" not in serialized
     assert "@gmail.com" not in serialized
+    assert not re.search(r"docs\.google\.com/spreadsheets/d/[A-Za-z0-9_-]+", serialized)
+    assert "$env.GOOGLE_SHEET_URL" in serialized
     assert "dryRun" in serialized and '"booleanValue": true' in serialized
     assert "writeSheets" in serialized and "sendEmail" in serialized
     assert "Duplicate SEQN Guard" in serialized
     assert "Validate Output Bundle" in serialized
+
+
+def test_workflow_command_matches_demo_cli_contract() -> None:
+    workflow = json.loads(WORKFLOW.read_text(encoding="utf-8"))
+    command = next(
+        node["parameters"]["command"]
+        for node in workflow["nodes"]
+        if node["name"] == "Execute Python Demo Pipeline"
+    )
+    for token in (
+        "demo-run",
+        "--mode",
+        "--provider",
+        "--output-dir",
+        "--sheet-url",
+    ):
+        assert token in command
+    args = build_parser().parse_args(
+        [
+            "demo-run",
+            "--mode",
+            "fixture",
+            "--provider",
+            "mock",
+            "--output-dir",
+            "output/demo",
+            "--sheet-url",
+            "",
+        ]
+    )
+    assert args.mode == "fixture"
+    assert args.provider == "mock"
+
+
+def test_fixtures_contain_no_delivery_identifiers_or_credentials() -> None:
+    serialized = "\n".join(
+        path.read_text(encoding="utf-8") for path in FIXTURES.rglob("*") if path.is_file()
+    )
+    forbidden = (
+        r"docs\.google\.com/spreadsheets/d/[A-Za-z0-9_-]+",
+        r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}",
+        r"""(?i)(api[_-]?key|access[_-]?token|client[_-]?secret)\s*[:=]\s*["'][^"']+["']""",
+    )
+    assert not any(re.search(pattern, serialized) for pattern in forbidden)
+
+
+def test_bundle_validation_rejects_empty_and_cross_sheet_drift(tmp_path: Path) -> None:
+    main(["demo-run", "--output-dir", str(tmp_path)])
+    from competitive_intelligence.demo import DemoBundle
+
+    payload = json.loads((tmp_path / "demo_bundle.json").read_text(encoding="utf-8"))
+    payload["comment_rows"] = []
+    payload["run_summary"]["sheet_row_counts"]["Comment"] = 0
+    with pytest.raises(ValueError, match="Comment must contain"):
+        validate_bundle(DemoBundle.model_validate(payload))
+
+    payload = json.loads((tmp_path / "demo_bundle.json").read_text(encoding="utf-8"))
+    payload["overall_trend_rows"][0]["Vendor"] = "walmart"
+    with pytest.raises(ValueError, match="identities do not reconcile"):
+        validate_bundle(DemoBundle.model_validate(payload))
+
+
+def test_fixture_demo_repeats_without_external_state(tmp_path: Path) -> None:
+    first_dir = tmp_path / "first"
+    second_dir = tmp_path / "second"
+    assert main(["demo-run", "--output-dir", str(first_dir)]) == 0
+    assert main(["demo-run", "--output-dir", str(second_dir)]) == 0
+    first = json.loads((first_dir / "demo_bundle.json").read_text(encoding="utf-8"))
+    second = json.loads((second_dir / "demo_bundle.json").read_text(encoding="utf-8"))
+    assert first["run_summary"]["sheet_row_counts"] == second["run_summary"]["sheet_row_counts"]
+    assert {
+        key: len(first[key])
+        for key in (
+            "stg_rows",
+            "ods_rows",
+            "tgt_rows",
+            "comment_rows",
+            "overall_trend_rows",
+            "recent_suggestion_rows",
+        )
+    } == {
+        key: len(second[key])
+        for key in (
+            "stg_rows",
+            "ods_rows",
+            "tgt_rows",
+            "comment_rows",
+            "overall_trend_rows",
+            "recent_suggestion_rows",
+        )
+    }

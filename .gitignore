@@ -6,6 +6,8 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
 dist/
 build/
@@ -27,3 +29,8 @@ Thumbs.db
 fixtures/live/
 data/
 output/
+*.log
+*.sqlite
+*.db
+credentials*.json
+service-account*.json
