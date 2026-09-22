@@ -76,6 +76,15 @@ python -m competitive_intelligence pipeline --mode fixture --output-dir output/d
 
 完整規則與對帳方式見 [`docs/data-pipeline.md`](docs/data-pipeline.md)。
 
+## 評論分析
+
+```bash
+python -m competitive_intelligence reviews --mode fixture --provider mock
+```
+
+The default review flow replays sanitized Amazon fixtures and uses a deterministic mock
+provider. See `docs/review-analysis.md` for provider configuration and safety limits.
+
 ## 尚未實作
 
-Google Sheets API 與實際寫入、評論擷取、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。
+Google Sheets API 與實際寫入、整體趨勢與營運建議、n8n workflow、Email、部署及任何排程均留待後續 PR。
