@@ -15,7 +15,15 @@ Python 負責可測試的資料擷取介面、解析、正規化與分析邏輯�
 
 ## Fixture 與 Live Capture 模式
 
-一般開發、測試與 CI 預設使用 `fixtures/` 中已清理且可公開的範例資料。未來若需要一次性 Live Capture，應由人工明確啟動並寫入被忽略的 `fixtures/live/`；資料經清理、去除敏感內容並完成審查後，才能成為版本控制內的 fixture。CI 永遠不執行 Live Capture。
+一般開發、測試與 CI 預設使用 `fixtures/` 中已清理且可公開的範例資料。9 組商品頁 fixture 均明確標示為 synthetic，不能解讀為真實市場價格。一次性 Live Capture 必須由人工明確啟動並寫入被忽略的 `fixtures/live/`；資料經清理、去除敏感內容並完成審查後，才能成為版本控制內的 fixture。CI 永遠不執行 Live Capture。操作與安全規則見 [`docs/capture-and-replay.md`](docs/capture-and-replay.md)。
+
+```bash
+# 預設：完全離線 fixture replay
+python -m competitive_intelligence capture
+
+# 明確 opt-in：一次性 live capture
+python -m competitive_intelligence capture --mode live
+```
 
 ## 本機環境
 
@@ -59,4 +67,4 @@ tests/                          自動測試
 
 ## 尚未實作
 
-Google Sheets API 與實際寫入、正式網站擷取、完整 fixtures、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。
+Google Sheets API 與實際寫入、評論擷取、LLM 分析、n8n workflow、Email、部署及任何排程均留待後續 PR。
