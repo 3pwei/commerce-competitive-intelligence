@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "seqn": "01790060177345964758",
+  "contracts": {
+    "STG": {
+      "valid": true,
+      "row_count": 9
+    },
+    "ODS": {
+      "valid": true,
+      "row_count": 9
+    },
+    "TGT": {
+      "valid": true,
+      "row_count": 9
+    },
+    "Comment": {
+      "valid": true,
+      "row_count": 3
+    },
+    "Overall Trend": {
+      "valid": true,
+      "row_count": 9
+    },
+    "Recent Suggestion": {
+      "valid": true,
+      "row_count": 3
+    }
+  },
+  "cross_sheet_reconciliation": "passed"
+}

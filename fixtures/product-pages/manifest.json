@@ -1,0 +1,68 @@
+{
+  "version": "1.0.0",
+  "fixtures": [
+    {
+      "product_id": "apple-airpods-pro-2", "vendor": "Amazon",
+      "source_url": "https://www.amazon.com/s?k=Apple+AirPods+Pro+2",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "apple-airpods-pro-2--amazon.html", "content_hash": "sha256:ca43bbcb675d18120ef2080de62906639025d537b1aa83ac3d1b110faa99c08e",
+      "expected_output": {"product_id":"apple-airpods-pro-2","product_name":"Apple AirPods Pro 2","vendor":"Amazon","base_price":"249.00","final_price":"189.99","stock_status":"in_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.amazon.com/s?k=Apple+AirPods+Pro+2","extraction_method":"meta","warnings":[]}
+    },
+    {
+      "product_id": "apple-airpods-pro-2", "vendor": "Walmart",
+      "source_url": "https://www.walmart.com/search?q=Apple+AirPods+Pro+2",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "apple-airpods-pro-2--walmart.html", "content_hash": "sha256:a82761199cf892911f5e7ce5017e238c2d60c071f04997c737d1a6343713b7fd",
+      "expected_output": {"product_id":"apple-airpods-pro-2","product_name":"Apple AirPods Pro 2","vendor":"Walmart","base_price":"249.00","final_price":"199.00","stock_status":"in_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.walmart.com/search?q=Apple+AirPods+Pro+2","extraction_method":"meta","warnings":[]}
+    },
+    {
+      "product_id": "apple-airpods-pro-2", "vendor": "Best Buy",
+      "source_url": "https://www.bestbuy.com/site/searchpage.jsp?st=Apple+AirPods+Pro+2",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "apple-airpods-pro-2--bestbuy.html", "content_hash": "sha256:b036d7a96f2427ce59f5e7b3deb17241dbf9aa2c0f7c1312d84edcc1f86ede19",
+      "expected_output": {"product_id":"apple-airpods-pro-2","product_name":"Apple AirPods Pro 2","vendor":"Best Buy","base_price":"249.99","final_price":"199.99","stock_status":"in_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.bestbuy.com/site/searchpage.jsp?st=Apple+AirPods+Pro+2","extraction_method":"meta","warnings":[]}
+    },
+    {
+      "product_id": "sony-wh-1000xm5-black", "vendor": "Amazon",
+      "source_url": "https://www.amazon.com/s?k=Sony+WH-1000XM5+Black",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "sony-wh-1000xm5-black--amazon.html", "content_hash": "sha256:2f4daaf2c315f4a338db08f895957e085009a194528203e27589b0c66c1aebb9",
+      "expected_output": {"product_id":"sony-wh-1000xm5-black","product_name":"Sony WH-1000XM5 Wireless Headphones - Black","vendor":"Amazon","base_price":"399.99","final_price":"348.00","stock_status":"in_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.amazon.com/s?k=Sony+WH-1000XM5+Black","extraction_method":"meta","warnings":[]}
+    },
+    {
+      "product_id": "sony-wh-1000xm5-black", "vendor": "Walmart",
+      "source_url": "https://www.walmart.com/search?q=Sony+WH-1000XM5+Black",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "sony-wh-1000xm5-black--walmart.html", "content_hash": "sha256:396bdf91f75e1ec6350ace5446d416fc8ff7cdce91e2b6693d5ec06072ae9a15",
+      "expected_output": {"product_id":"sony-wh-1000xm5-black","product_name":"Sony WH-1000XM5 Black","vendor":"Walmart","base_price":"399.99","final_price":"349.00","stock_status":"in_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.walmart.com/search?q=Sony+WH-1000XM5+Black","extraction_method":"meta","warnings":[]}
+    },
+    {
+      "product_id": "sony-wh-1000xm5-black", "vendor": "Best Buy",
+      "source_url": "https://www.bestbuy.com/site/searchpage.jsp?st=Sony+WH-1000XM5+Black",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "sony-wh-1000xm5-black--bestbuy.html", "content_hash": "sha256:6864bcdcf0e77501efc103bad9c083c6f479d26fe9c73be3b0f8d483da5f7a4f",
+      "expected_output": {"product_id":"sony-wh-1000xm5-black","product_name":"Sony WH-1000XM5 - Black","vendor":"Best Buy","base_price":"399.99","final_price":"349.99","stock_status":"out_of_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.bestbuy.com/site/searchpage.jsp?st=Sony+WH-1000XM5+Black","extraction_method":"meta","warnings":[]}
+    },
+    {
+      "product_id": "bose-quietcomfort-black", "vendor": "Amazon",
+      "source_url": "https://www.amazon.com/s?k=Bose+QuietComfort+Black",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "bose-quietcomfort-black--amazon.html", "content_hash": "sha256:8529641a3cef23bb15fbf3183f1b3591cf41de715db7685d66b522b60c1d7bb3",
+      "expected_output": {"product_id":"bose-quietcomfort-black","product_name":"Bose QuietComfort Headphones - Black","vendor":"Amazon","base_price":"429.00","final_price":"349.00","stock_status":"in_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.amazon.com/s?k=Bose+QuietComfort+Black","extraction_method":"meta","warnings":[]}
+    },
+    {
+      "product_id": "bose-quietcomfort-black", "vendor": "Walmart",
+      "source_url": "https://www.walmart.com/search?q=Bose+QuietComfort+Black",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "bose-quietcomfort-black--walmart.html", "content_hash": "sha256:bce232423768ea868348dfc04d80fdb700134bc8fff563d3f6e85226de096e99",
+      "expected_output": {"product_id":"bose-quietcomfort-black","product_name":"Bose QuietComfort Black Headphones","vendor":"Walmart","base_price":"429.00","final_price":"359.00","stock_status":"in_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.walmart.com/search?q=Bose+QuietComfort+Black","extraction_method":"meta","warnings":[]}
+    },
+    {
+      "product_id": "bose-quietcomfort-black", "vendor": "Best Buy",
+      "source_url": "https://www.bestbuy.com/site/searchpage.jsp?st=Bose+QuietComfort+Black",
+      "captured_at": "2026-09-22T00:00:00Z", "capture_method": "fixture", "fixture_type": "synthetic",
+      "evidence_path": "bose-quietcomfort-black--bestbuy.html", "content_hash": "sha256:99735fff7cc7380515035ba91e99bb0697cf5225722a839ca418572824b3cea5",
+      "expected_output": {"product_id":"bose-quietcomfort-black","product_name":"Bose QuietComfort Wireless Headphones - Black","vendor":"Best Buy","base_price":"429.99","final_price":"349.99","stock_status":"in_stock","observed_at":"2026-09-22T00:00:00Z","source_url":"https://www.bestbuy.com/site/searchpage.jsp?st=Bose+QuietComfort+Black","extraction_method":"meta","warnings":[]}
+    }
+  ]
+}

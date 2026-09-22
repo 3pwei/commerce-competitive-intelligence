@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "products": [
+    {
+      "product_id": "apple-airpods-pro-2",
+      "product_name": "Apple AirPods Pro 2",
+      "own_price": "249.00",
+      "urls": {
+        "amazon": "https://www.amazon.com/s?k=Apple+AirPods+Pro+2",
+        "walmart": "https://www.walmart.com/search?q=Apple+AirPods+Pro+2",
+        "bestbuy": "https://www.bestbuy.com/site/searchpage.jsp?st=Apple+AirPods+Pro+2"
+      },
+      "enabled": true
+    },
+    {
+      "product_id": "sony-wh-1000xm5-black",
+      "product_name": "Sony WH-1000XM5 (Black)",
+      "own_price": "328.00",
+      "urls": {
+        "amazon": "https://www.amazon.com/s?k=Sony+WH-1000XM5+Black",
+        "walmart": "https://www.walmart.com/search?q=Sony+WH-1000XM5+Black",
+        "bestbuy": "https://www.bestbuy.com/site/searchpage.jsp?st=Sony+WH-1000XM5+Black"
+      },
+      "enabled": true
+    },
+    {
+      "product_id": "bose-quietcomfort-black",
+      "product_name": "Bose QuietComfort (Black)",
+      "own_price": "429.00",
+      "urls": {
+        "amazon": "https://www.amazon.com/s?k=Bose+QuietComfort+Black",
+        "walmart": "https://www.walmart.com/search?q=Bose+QuietComfort+Black",
+        "bestbuy": "https://www.bestbuy.com/site/searchpage.jsp?st=Bose+QuietComfort+Black"
+      },
+      "enabled": true
+    }
+  ]
+}
