@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   quality:
@@ -38,3 +39,5 @@ jobs:
         run: python -m competitive_intelligence demo-run --mode fixture --provider mock --output-dir output/ci
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
