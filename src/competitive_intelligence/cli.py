@@ -12,6 +12,7 @@ from competitive_intelligence.comment_output import (
     write_comment_outputs,
 )
 from competitive_intelligence.config import load_product_catalog
+from competitive_intelligence.demo import run_demo, write_demo_bundle
 from competitive_intelligence.pipeline import run_pipeline, write_outputs
 from competitive_intelligence.recommendations import (
     MockRecommendationProvider,
@@ -86,12 +87,41 @@ def build_parser() -> argparse.ArgumentParser:
     recommendation.add_argument("--output-dir", type=Path, required=True)
     recommendation.add_argument("--config", type=Path, default=Path("config/products.example.json"))
     recommendation.add_argument("--comment-evidence", type=Path)
+    demo = subparsers.add_parser("demo-run", help="Build the complete validated n8n bundle")
+    demo.add_argument("--mode", choices=("fixture", "live"), default="fixture")
+    demo.add_argument("--provider", choices=("mock", "configured"), default="mock")
+    demo.add_argument("--output-dir", type=Path, required=True)
+    demo.add_argument("--config", type=Path, default=Path("config/products.example.json"))
+    demo.add_argument("--fixtures", type=Path, default=Path("fixtures/product-pages/manifest.json"))
+    demo.add_argument(
+        "--review-fixtures", type=Path, default=Path("fixtures/reviews/manifest.json")
+    )
+    demo.add_argument("--rules", type=Path, default=Path("config/business-rules.v1.json"))
+    demo.add_argument("--live-output", type=Path, default=Path("fixtures/live"))
+    demo.add_argument(
+        "--sheet-url",
+        default="https://docs.google.com/spreadsheets/d/1mQbLChrt8DkusDTki5WBfr_IGmK3xF8IaDspM3zCV60/edit",
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the placeholder CLI."""
     args = build_parser().parse_args(argv)
+    if args.command == "demo-run":
+        bundle = run_demo(
+            mode=args.mode,
+            provider=args.provider,
+            product_config=args.config,
+            product_fixtures=args.fixtures,
+            review_fixtures=args.review_fixtures,
+            rules=args.rules,
+            live_output=args.live_output,
+            sheet_url=args.sheet_url,
+        )
+        path = write_demo_bundle(bundle, args.output_dir)
+        print(json.dumps({"seqn": bundle.seqn, "bundle": str(path)}, indent=2))
+        return 0
     if args.command == "recommendations":
         recommendation_provider = (
             MockRecommendationProvider() if args.provider == "mock" else ConfiguredLLMProvider()

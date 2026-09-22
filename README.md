@@ -7,7 +7,7 @@
 - 這是 side-project Demo，不是正式資料平台或常駐服務。
 - n8n workflow 僅由使用者人工觸發，不建立自動排程。
 - 專案不使用 PostgreSQL、SQLite、Redis 或其他資料庫。
-- 此階段不會呼叫真實網站、付費 API、LLM、Google Sheets 或 Email 服務。
+- 預設 Demo 完全離線；只有人工關閉 dry run 並明確啟用整合時才呼叫外部服務。
 
 ## Python 與 n8n 的責任邊界
 
@@ -123,6 +123,17 @@ python -m competitive_intelligence recommendations \
 schema 的 JSON/CSV 及 evidence/summary sidecar。Mock 模式完全離線且可重現；任何建議
 都不會直接調價、通知或修改外部系統。詳見 [`docs/recommendations.md`](docs/recommendations.md)。
 
+## n8n 端到端 Demo
+
+```bash
+python -m competitive_intelligence demo-run \
+  --mode fixture --provider mock --output-dir output/demo
+```
+
+命令會產生單一 `demo_bundle.json`，並在任何外部步驟前完成六張 Sheet contract 驗證與
+Email preview。可匯入的人工 workflow、dry-run、SEQN 重複保護及 credentials 設定方式見
+[`docs/n8n-integration.md`](docs/n8n-integration.md)。
+
 ## 尚未實作
 
-Google Sheets API 與實際寫入、n8n workflow、Email、部署及任何排程均留待後續 PR。
+部署、自動排程、Database、Dashboard 與常駐 API 不在此 Demo 範圍。
