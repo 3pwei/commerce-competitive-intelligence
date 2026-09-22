@@ -18,6 +18,16 @@ def test_release_versions_and_license_are_consistent() -> None:
     assert (ROOT / "LICENSE").read_text(encoding="utf-8").startswith("MIT License")
 
 
+def test_ci_environment_keys_are_case_insensitively_unique() -> None:
+    workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    env_keys = [
+        match.group(1)
+        for match in re.finditer(r"^\s{10}([A-Za-z_][A-Za-z0-9_]*):", workflow, re.MULTILINE)
+    ]
+    normalized = [key.casefold() for key in env_keys]
+    assert len(normalized) == len(set(normalized))
+
+
 def test_relative_markdown_links_resolve() -> None:
     missing: list[str] = []
     pattern = re.compile(r"\[[^]]*\]\(([^)]+)\)")
