@@ -58,6 +58,25 @@ Python 擁有擷取、解析、正規化、規則、LLM 輸出驗證及資料契
 
 ## Quick Start
 
+### Windows Docker Desktop（建議）
+
+需要 Docker Desktop 4.x（Linux containers + Docker Compose v2）。專案固定使用
+`n8nio/n8n:2.4.4`，自訂 image 內含 Python 3.12 相容 runtime、專案套件與 fixture；不需要進入
+容器安裝任何套件。全新 clone 後，在 Windows PowerShell 執行：
+
+```powershell
+docker compose build n8n
+docker compose up -d n8n
+docker compose --profile test run --rm n8n-smoke
+```
+
+第三行會自動匯入並在真實 n8n runtime 執行 offline workflow。瀏覽器 UI 位於
+`http://localhost:5678`，輸出位於 `output\\n8n`。`n8n_data` named volume 在容器重啟或一般
+`down` 後仍會保留。完整啟停、logs、匯入及移除指令見
+[`docs/demo-runbook.md`](docs/demo-runbook.md)。
+
+### Python CLI
+
 需要 Python 3.12。以下流程在一般網路環境約五分鐘完成；執行 Demo 本身不連外：
 
 ```bash

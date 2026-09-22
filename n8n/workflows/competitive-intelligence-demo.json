@@ -1,4 +1,5 @@
 {
+  "id": "competitive-intelligence-demo-v2",
   "name": "Competitive Intelligence — Manual Demo",
   "nodes": [
     {
@@ -13,14 +14,13 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            {"id": "mode", "name": "mode", "type": "string", "value": "fixture"},
-            {"id": "provider", "name": "provider", "type": "string", "value": "mock"},
-            {"id": "dryRun", "name": "dryRun", "type": "boolean", "value": {"booleanValue": true}},
+            {"id": "fixtureMode", "name": "fixtureMode", "type": "boolean", "value": true},
+            {"id": "mockLlm", "name": "mockLlm", "type": "boolean", "value": true},
+            {"id": "dryRun", "name": "dryRun", "type": "boolean", "value": true},
             {"id": "writeSheets", "name": "writeSheets", "type": "boolean", "value": false},
             {"id": "sendEmail", "name": "sendEmail", "type": "boolean", "value": false},
             {"id": "recipient", "name": "recipient", "type": "string", "value": ""},
-            {"id": "projectDir", "name": "projectDir", "type": "string", "value": "={{ $env.PROJECT_DIR }}"},
-            {"id": "sheetUrl", "name": "sheetUrl", "type": "string", "value": "={{ $env.GOOGLE_SHEET_URL }}"}
+            {"id": "sheetUrl", "name": "sheetUrl", "type": "string", "value": ""}
           ]
         },
         "options": {}
@@ -33,7 +33,7 @@
     },
     {
       "parameters": {
-        "command": "=cd {{ $json.projectDir }} && python -m competitive_intelligence demo-run --mode {{ $json.mode }} --provider {{ $json.provider }} --output-dir output/demo --sheet-url '{{ $json.sheetUrl }}'"
+        "command": "cd /opt/competitive-intelligence && python3 -m competitive_intelligence demo-run --mode fixture --provider mock --output-dir /demo-output"
       },
       "id": "execute-pipeline",
       "name": "Execute Python Demo Pipeline",
@@ -43,7 +43,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "={{ $('Select Demo Options').first().json.projectDir }}/output/demo/demo_bundle.json",
+        "fileSelector": "/demo-output/demo_bundle.json",
         "options": {}
       },
       "id": "read-bundle",
@@ -62,7 +62,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const b=$json; const o=$('Select Demo Options').first().json; const required={stg_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','Stock Status','Timestamp','SEQN'],ods_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','Stock Status','Timestamp','SEQN'],tgt_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','My price','Recent Stock','Current Stock','Timestamp'],comment_rows:['Product Name','Vendor','Pros1','Pros2','Pros3','Cons1','Cons2','Cons3','Summary'],overall_trend_rows:['Product Name','Vendor','Overall Trend','Observation'],recent_suggestion_rows:['Product Name','Vendor','Suggestion']}; if(!b.seqn||b.run_summary?.seqn!==b.seqn) throw new Error('Invalid bundle SEQN'); for(const [key,headers] of Object.entries(required)){if(!Array.isArray(b[key])) throw new Error(`Missing ${key}`); for(const row of b[key]) if(JSON.stringify(Object.keys(row))!==JSON.stringify(headers)) throw new Error(`Schema mismatch: ${key}`);} return [{json:{...b,options:o}}];"
+        "jsCode": "const b=$json.data; const o=$('Select Demo Options').first().json; const required={stg_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','Stock Status','Timestamp','SEQN'],ods_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','Stock Status','Timestamp','SEQN'],tgt_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','My price','Recent Stock','Current Stock','Timestamp'],comment_rows:['Product Name','Vendor','Pros1','Pros2','Pros3','Cons1','Cons2','Cons3','Summary'],overall_trend_rows:['Product Name','Vendor','Overall Trend','Observation'],recent_suggestion_rows:['Product Name','Vendor','Suggestion']}; if(!b.seqn||b.run_summary?.seqn!==b.seqn) throw new Error('Invalid bundle SEQN'); for(const [key,headers] of Object.entries(required)){if(!Array.isArray(b[key])) throw new Error(`Missing ${key}`); for(const row of b[key]) if(JSON.stringify(Object.keys(row))!==JSON.stringify(headers)) throw new Error(`Schema mismatch: ${key}`);} return [{json:{...b,options:o}}];"
       },
       "id": "validate-bundle",
       "name": "Validate Output Bundle",
@@ -200,9 +200,17 @@
       "position": [3200, 140]
     },
     {
+      "parameters": {"jsCode": "const b=$('Validate Output Bundle').first().json; return [{json:{...b,sheetsDryRun:{status:'validated',writeAttempted:false,sheetRows:b.run_summary.sheet_row_counts}}}];"},
+      "id": "sheets-dry-run",
+      "name": "Sheets Dry-Run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3200, -120]
+    },
+    {
       "parameters": {"jsCode": "const b=$('Validate Output Bundle').first().json; const o=b.options; return [{json:{...b,maySendEmail:!o.dryRun&&o.sendEmail&&String(o.recipient||'').trim().length>0}}];"},
       "id": "email-gate-data",
-      "name": "Build Email Delivery Decision",
+      "name": "Build Email Preview",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [3420, 20]
@@ -224,9 +232,9 @@
       "position": [3860, -80]
     },
     {
-      "parameters": {"jsCode": "const b=$('Validate Output Bundle').first().json; return [{json:{status:'completed',dryRun:b.options.dryRun,seqn:b.seqn,sheetRows:b.run_summary.sheet_row_counts,eventCount:b.run_summary.detected_event_count,emailPreview:b.email_content,emailSent:!b.options.dryRun&&b.options.sendEmail&&String(b.options.recipient||'').trim().length>0}}];"},
+      "parameters": {"jsCode": "const b=$('Validate Output Bundle').first().json; return [{json:{status:'completed',executionId:$execution.id,dryRun:b.options.dryRun,seqn:b.seqn,sheetRows:b.run_summary.sheet_row_counts,eventCount:b.run_summary.detected_event_count,emailPreviewPath:'/demo-output/email_preview.html',emailPreview:b.email_content,emailSent:!b.options.dryRun&&b.options.sendEmail&&String(b.options.recipient||'').trim().length>0}}];"},
       "id": "run-summary",
-      "name": "Run Summary",
+      "name": "Execution Summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [4080, 20]
@@ -240,7 +248,8 @@
     "Read Demo Bundle": {"main": [[{"node": "Parse Demo Bundle", "type": "main", "index": 0}]]},
     "Parse Demo Bundle": {"main": [[{"node": "Validate Output Bundle", "type": "main", "index": 0}]]},
     "Validate Output Bundle": {"main": [[{"node": "Dry Run or Sheets Disabled", "type": "main", "index": 0}]]},
-    "Dry Run or Sheets Disabled": {"main": [[{"node": "Build Email Delivery Decision", "type": "main", "index": 0}], [{"node": "Read Existing STG SEQN", "type": "main", "index": 0}]]},
+    "Dry Run or Sheets Disabled": {"main": [[{"node": "Sheets Dry-Run", "type": "main", "index": 0}], [{"node": "Read Existing STG SEQN", "type": "main", "index": 0}]]},
+    "Sheets Dry-Run": {"main": [[{"node": "Build Email Preview", "type": "main", "index": 0}]]},
     "Read Existing STG SEQN": {"main": [[{"node": "Duplicate SEQN Guard", "type": "main", "index": 0}]]},
     "Duplicate SEQN Guard": {"main": [[{"node": "Prepare STG Rows", "type": "main", "index": 0}]]},
     "Prepare STG Rows": {"main": [[{"node": "Write STG", "type": "main", "index": 0}]]},
@@ -254,10 +263,10 @@
     "Prepare Overall Trend Rows": {"main": [[{"node": "Write Overall Trend", "type": "main", "index": 0}]]},
     "Write Overall Trend": {"main": [[{"node": "Prepare Recent Suggestion Rows", "type": "main", "index": 0}]]},
     "Prepare Recent Suggestion Rows": {"main": [[{"node": "Write Recent Suggestion", "type": "main", "index": 0}]]},
-    "Write Recent Suggestion": {"main": [[{"node": "Build Email Delivery Decision", "type": "main", "index": 0}]]},
-    "Build Email Delivery Decision": {"main": [[{"node": "Email Enabled and Recipient Present", "type": "main", "index": 0}]]},
-    "Email Enabled and Recipient Present": {"main": [[{"node": "Optional Gmail Send", "type": "main", "index": 0}], [{"node": "Run Summary", "type": "main", "index": 0}]]},
-    "Optional Gmail Send": {"main": [[{"node": "Run Summary", "type": "main", "index": 0}]]}
+    "Write Recent Suggestion": {"main": [[{"node": "Build Email Preview", "type": "main", "index": 0}]]},
+    "Build Email Preview": {"main": [[{"node": "Email Enabled and Recipient Present", "type": "main", "index": 0}]]},
+    "Email Enabled and Recipient Present": {"main": [[{"node": "Optional Gmail Send", "type": "main", "index": 0}], [{"node": "Execution Summary", "type": "main", "index": 0}]]},
+    "Optional Gmail Send": {"main": [[{"node": "Execution Summary", "type": "main", "index": 0}]]}
   },
   "active": false,
   "settings": {"executionOrder": "v1"},

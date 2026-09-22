@@ -1,0 +1,24 @@
+FROM python:3.12-alpine AS python-runtime
+
+FROM n8nio/n8n:2.4.4
+
+USER root
+
+COPY --from=python-runtime /usr/local /usr/local
+
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools
+
+WORKDIR /opt/competitive-intelligence
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+COPY config ./config
+COPY fixtures ./fixtures
+COPY scripts ./scripts
+COPY n8n ./n8n
+
+RUN python3 -m pip install --no-cache-dir . \
+    && mkdir -p /demo-output /home/node/.n8n \
+    && chown -R node:node /opt/competitive-intelligence /demo-output /home/node/.n8n
+
+USER node
+WORKDIR /opt/competitive-intelligence
