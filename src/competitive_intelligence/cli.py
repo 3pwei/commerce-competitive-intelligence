@@ -1,18 +1,41 @@
 """Command-line entry point for the demo project."""
 
 import argparse
+import json
 from collections.abc import Sequence
+from pathlib import Path
+
+from competitive_intelligence.capture import capture_live, replay
+from competitive_intelligence.config import load_product_catalog
 
 
 def build_parser() -> argparse.ArgumentParser:
     """Build the top-level argument parser."""
-    return argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(
         prog="competitive-intelligence",
         description="Competitive pricing and review analysis demo.",
     )
+    subparsers = parser.add_subparsers(dest="command")
+    capture = subparsers.add_parser("capture", help="Capture or replay product listings")
+    capture.add_argument("--mode", choices=("fixture", "live"), default="fixture")
+    capture.add_argument("--config", type=Path, default=Path("config/products.example.json"))
+    capture.add_argument(
+        "--fixtures", type=Path, default=Path("fixtures/product-pages/manifest.json")
+    )
+    capture.add_argument("--live-output", type=Path, default=Path("fixtures/live"))
+    return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the placeholder CLI."""
-    build_parser().parse_args(argv)
-    return 0
+    args = build_parser().parse_args(argv)
+    if args.command != "capture":
+        return 0
+    if args.mode == "fixture":
+        observations = replay(args.fixtures)
+        print(json.dumps([item.model_dump(mode="json") for item in observations], indent=2))
+        return 0
+    catalog = load_product_catalog(args.config)
+    observations, failures = capture_live(catalog, args.live_output)
+    print(json.dumps({"captured": len(observations), "failed": len(failures)}, indent=2))
+    return 1 if failures else 0

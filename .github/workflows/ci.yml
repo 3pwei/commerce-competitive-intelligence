@@ -29,4 +29,5 @@ jobs:
         run: mypy src
       - name: Pytest
         run: pytest
-
+      - name: Offline fixture replay
+        run: python -m competitive_intelligence capture --mode fixture >/dev/null
