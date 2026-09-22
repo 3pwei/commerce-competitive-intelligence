@@ -1,8 +1,0 @@
-[
-  {"review_id":"air-006","product_id":"apple-airpods-pro-2","rating":5,"title":"Clear sound","review_text":"Clear sound and excellent noise cancellation.","review_date":"2026-08-06","source":"amazon","captured_at":"2026-09-20T00:00:00Z"},
-  {"review_id":"air-005","product_id":"apple-airpods-pro-2","rating":2,"title":"Battery issue","review_text":"The battery drains faster than expected after calls.","review_date":"2026-08-05","source":"amazon","captured_at":"2026-09-20T00:00:00Z"},
-  {"review_id":"air-004","product_id":"apple-airpods-pro-2","rating":4,"title":"Good fit","review_text":"Comfortable fit for commuting and calls.","review_date":"2026-08-04","source":"amazon","captured_at":"2026-09-20T00:00:00Z"},
-  {"review_id":"air-003","product_id":"apple-airpods-pro-2","rating":3,"title":"Charging battery","review_text":"Battery and charging performance is inconsistent.","review_date":"2026-08-03","source":"amazon","captured_at":"2026-09-20T00:00:00Z"},
-  {"review_id":"air-002","product_id":"apple-airpods-pro-2","rating":5,"title":"Easy connection","review_text":"Connection is quick and stable with my phone.","review_date":"2026-08-02","source":"amazon","captured_at":"2026-09-20T00:00:00Z"},
-  {"review_id":"air-001","product_id":"apple-airpods-pro-2","rating":4,"title":"Useful controls","review_text":"Controls are responsive and the case is compact.","review_date":"2026-08-01","source":"amazon","captured_at":"2026-09-20T00:00:00Z"}
-]
