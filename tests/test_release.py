@@ -26,6 +26,8 @@ def test_ci_environment_keys_are_case_insensitively_unique() -> None:
     ]
     normalized = [key.casefold() for key in env_keys]
     assert len(normalized) == len(set(normalized))
+    assert "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}" in workflow
+    assert "pull-requests: read" in workflow
 
 
 def test_relative_markdown_links_resolve() -> None:
