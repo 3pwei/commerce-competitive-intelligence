@@ -4,14 +4,20 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "commerce-competitive-intelligence"
-version = "0.1.0"
-description = "Demo foundation for competitive pricing and review analysis."
+version = "1.0.0"
+description = "Offline-first competitive pricing, stock, and review intelligence demo."
 readme = "README.md"
+license = "MIT"
+keywords = ["competitive-intelligence", "ecommerce", "n8n", "google-sheets"]
 requires-python = ">=3.12"
 dependencies = [
   "beautifulsoup4>=4.12,<5",
   "pydantic>=2.10,<3",
 ]
+
+[project.urls]
+Repository = "https://github.com/3pwei/commerce-competitive-intelligence"
+Documentation = "https://github.com/3pwei/commerce-competitive-intelligence#readme"
 
 [project.optional-dependencies]
 dev = [

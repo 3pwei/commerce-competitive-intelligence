@@ -1,0 +1,10 @@
+Item Number,Product Name,Vendor,Base Price,Final Price,Stock Status,Timestamp,SEQN
+apple-airpods-pro-2,Apple AirPods Pro 2,amazon,249.00,189.99,In Stock,2026-09-22T00:00:00+00:00,01790060177345964758
+apple-airpods-pro-2,Apple AirPods Pro 2,walmart,249.00,199.00,In Stock,2026-09-22T00:00:00+00:00,01790060177345964758
+apple-airpods-pro-2,Apple AirPods Pro 2,bestbuy,249.99,199.99,In Stock,2026-09-22T00:00:00+00:00,01790060177345964758
+sony-wh-1000xm5-black,Sony WH-1000XM5 Wireless Headphones - Black,amazon,399.99,348.00,In Stock,2026-09-22T00:00:00+00:00,01790060177345964758
+sony-wh-1000xm5-black,Sony WH-1000XM5 Black,walmart,399.99,349.00,In Stock,2026-09-22T00:00:00+00:00,01790060177345964758
+sony-wh-1000xm5-black,Sony WH-1000XM5 - Black,bestbuy,399.99,349.99,Out of Stock,2026-09-22T00:00:00+00:00,01790060177345964758
+bose-quietcomfort-black,Bose QuietComfort Headphones - Black,amazon,429.00,349.00,In Stock,2026-09-22T00:00:00+00:00,01790060177345964758
+bose-quietcomfort-black,Bose QuietComfort Black Headphones,walmart,429.00,359.00,In Stock,2026-09-22T00:00:00+00:00,01790060177345964758
+bose-quietcomfort-black,Bose QuietComfort Wireless Headphones - Black,bestbuy,429.99,349.99,In Stock,2026-09-22T00:00:00+00:00,01790060177345964758

@@ -1,0 +1,145 @@
+[
+  {
+    "rule_id": "COMPETITOR_PRICE_LOWER",
+    "product_id": "apple-airpods-pro-2",
+    "product_name": "Apple AirPods Pro 2",
+    "vendor": "amazon",
+    "severity": "warning",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "189.99",
+      "own_price": "249.00",
+      "difference_amount": "59.01",
+      "difference_percent": "23.70"
+    }
+  },
+  {
+    "rule_id": "LOWEST_COMPETITOR",
+    "product_id": "apple-airpods-pro-2",
+    "product_name": "Apple AirPods Pro 2",
+    "vendor": "amazon",
+    "severity": "info",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "189.99",
+      "own_price": "249.00",
+      "difference_amount": "59.01",
+      "difference_percent": "23.70",
+      "rank": "1",
+      "tie": "false"
+    }
+  },
+  {
+    "rule_id": "COMPETITOR_PRICE_LOWER",
+    "product_id": "apple-airpods-pro-2",
+    "product_name": "Apple AirPods Pro 2",
+    "vendor": "bestbuy",
+    "severity": "warning",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "199.99",
+      "own_price": "249.00",
+      "difference_amount": "49.01",
+      "difference_percent": "19.68"
+    }
+  },
+  {
+    "rule_id": "COMPETITOR_PRICE_LOWER",
+    "product_id": "apple-airpods-pro-2",
+    "product_name": "Apple AirPods Pro 2",
+    "vendor": "walmart",
+    "severity": "warning",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "199.00",
+      "own_price": "249.00",
+      "difference_amount": "50.00",
+      "difference_percent": "20.08"
+    }
+  },
+  {
+    "rule_id": "COMPETITOR_PRICE_LOWER",
+    "product_id": "bose-quietcomfort-black",
+    "product_name": "Bose QuietComfort (Black)",
+    "vendor": "amazon",
+    "severity": "warning",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "349.00",
+      "own_price": "429.00",
+      "difference_amount": "80.00",
+      "difference_percent": "18.65"
+    }
+  },
+  {
+    "rule_id": "LOWEST_COMPETITOR",
+    "product_id": "bose-quietcomfort-black",
+    "product_name": "Bose QuietComfort (Black)",
+    "vendor": "amazon",
+    "severity": "info",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "349.00",
+      "own_price": "429.00",
+      "difference_amount": "80.00",
+      "difference_percent": "18.65",
+      "rank": "1",
+      "tie": "false"
+    }
+  },
+  {
+    "rule_id": "COMPETITOR_PRICE_LOWER",
+    "product_id": "bose-quietcomfort-black",
+    "product_name": "Bose QuietComfort (Black)",
+    "vendor": "bestbuy",
+    "severity": "warning",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "349.99",
+      "own_price": "429.00",
+      "difference_amount": "79.01",
+      "difference_percent": "18.42"
+    }
+  },
+  {
+    "rule_id": "COMPETITOR_PRICE_LOWER",
+    "product_id": "bose-quietcomfort-black",
+    "product_name": "Bose QuietComfort (Black)",
+    "vendor": "walmart",
+    "severity": "warning",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "359.00",
+      "own_price": "429.00",
+      "difference_amount": "70.00",
+      "difference_percent": "16.32"
+    }
+  },
+  {
+    "rule_id": "LOWEST_COMPETITOR",
+    "product_id": "sony-wh-1000xm5-black",
+    "product_name": "Sony WH-1000XM5 (Black)",
+    "vendor": "amazon",
+    "severity": "info",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "final_price": "348.00",
+      "own_price": "328.00",
+      "difference_amount": "-20.00",
+      "difference_percent": "-6.10",
+      "rank": "1",
+      "tie": "false"
+    }
+  },
+  {
+    "rule_id": "OUT_OF_STOCK",
+    "product_id": "sony-wh-1000xm5-black",
+    "product_name": "Sony WH-1000XM5 (Black)",
+    "vendor": "bestbuy",
+    "severity": "critical",
+    "seqn": "01790060177345964758",
+    "evidence": {
+      "current_stock": "Out of Stock"
+    }
+  }
+]

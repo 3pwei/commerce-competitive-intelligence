@@ -1,0 +1,18 @@
+{
+  "seqn": "01790060177345964758",
+  "mode": "fixture",
+  "provider": "mock",
+  "generated_at": "2026-09-22T06:56:17.348900Z",
+  "sheet_row_counts": {
+    "STG": 9,
+    "ODS": 9,
+    "TGT": 9,
+    "Comment": 3,
+    "Overall Trend": 9,
+    "Recent Suggestion": 3
+  },
+  "detected_event_count": 10,
+  "recommendation_count": 3,
+  "rejected_row_count": 0,
+  "actionable": true
+}

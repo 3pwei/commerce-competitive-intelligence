@@ -1,153 +1,163 @@
 # Commerce Competitive Intelligence
 
-競品價格與評論分析的展示型專案，作為後續 Python 分析元件、可替換的外部服務 Adapter，以及 n8n 人工流程的共同工程基礎。
+[![CI](https://github.com/3pwei/commerce-competitive-intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/3pwei/commerce-competitive-intelligence/actions/workflows/ci.yml)
 
-## 專案定位
+## Overview
 
-- 這是 side-project Demo，不是正式資料平台或常駐服務。
-- n8n workflow 僅由使用者人工觸發，不建立自動排程。
-- 專案不使用 PostgreSQL、SQLite、Redis 或其他資料庫。
-- 預設 Demo 完全離線；只有人工關閉 dry run 並明確啟用整合時才呼叫外部服務。
+Commerce Competitive Intelligence 是可公開重現的電商競品情報 Demo。它用 Python 將三項示範商品在 Amazon、Walmart 與 Best Buy 的價格、庫存及評論轉成六張 Google Sheets 相容資料集，再由確定性規則辨識事件、由可替換的 LLM Adapter 產生有證據的營運建議。n8n 只負責人工觸發與選用的 Sheets／Email 交付。
 
-## Python 與 n8n 的責任邊界
+預設路徑完全離線、零成本且不需要 credentials。Repository 內的商品頁、評論、價格與庫存均為 synthetic／sanitized 展示資料，不代表即時市場狀況。
 
-Python 負責可測試的資料擷取介面、解析、正規化與分析邏輯；外部服務以 `Protocol`／Adapter 隔離，避免綁定單一爬蟲或 LLM 供應商。n8n 負責人工啟動、步驟編排、輸入輸出傳遞，以及未來的 Google Sheets 與 Email 串接，不承載核心分析規則。
+![Sanitized offline demo result](docs/assets/demo-summary.svg)
 
-## Fixture 與 Live Capture 模式
+## Business Problem
 
-一般開發、測試與 CI 預設使用 `fixtures/` 中已清理且可公開的範例資料。9 組商品頁 fixture 均明確標示為 synthetic，不能解讀為真實市場價格。一次性 Live Capture 必須由人工明確啟動並寫入被忽略的 `fixtures/live/`；資料經清理、去除敏感內容並完成審查後，才能成為版本控制內的 fixture。CI 永遠不執行 Live Capture。操作與安全規則見 [`docs/capture-and-replay.md`](docs/capture-and-replay.md)。
+電商營運人員通常要跨站比價、追蹤缺貨、閱讀大量評論，再把判斷整理到試算表與 Email。這個專案示範如何把流程拆成可驗證、可追溯且供應商中立的資料管線：
 
-```bash
-# 預設：完全離線 fixture replay
-python -m competitive_intelligence capture
+- 同一批次統一追蹤競品價格、庫存與評論。
+- 商業規則先判斷事實，LLM 只根據已確認事件提出建議。
+- 六張 Sheet 在外部寫入前先做欄位順序與跨表關聯驗證。
+- fixture、mock 與 dry-run 讓 Demo、測試及 CI 不依賴網站或付費服務。
 
-# 明確 opt-in：一次性 live capture
-python -m competitive_intelligence capture --mode live
+## Features
+
+- 三個 retailer 的可替換 `PageFetcher`／parser 邊界及 one-time capture。
+- STG → ODS → TGT 的驗證、正規化、去重與 rejected-row audit。
+- 評論的正規化、去重與結構化 mock／configured LLM 分析。
+- 價格、庫存、評論風險事件與 evidence sidecars。
+- 六張 Sheet contract、Google Sheets append、防重複 SEQN 與 Email preview。
+- Manual Trigger-only n8n workflow；預設 fixture + mock + dry-run。
+
+## Architecture
+
+```mermaid
+flowchart TB
+  A["Manual CLI / n8n"] --> B["Capture boundary"]
+  B --> C["Fixture or one-time live capture"]
+  C --> D["Python validation and analysis"]
+  D --> E["Six Sheet contracts"]
+  D --> F["Evidence and Email preview"]
+  E --> G["Optional Google Sheets adapter"]
+  F --> H["Optional Gmail adapter"]
 ```
 
-## 本機環境
+完整架構、兩種擷取資料流及外部服務替換邊界見 [`docs/architecture.md`](docs/architecture.md)。
 
-需要 Python 3.12：
+## Data Flow
+
+```mermaid
+flowchart LR
+  A["Fixture"] --> B["STG"] --> C["ODS"] --> D["TGT"]
+  D --> E["Rules"] --> F["Overall Trend"]
+  G["Reviews"] --> H["Comment"] --> E
+  F --> I["Recommendations"] --> J["Recent Suggestion"]
+  J --> K["Sheets / Email"]
+```
+
+Python 擁有擷取、解析、正規化、規則、LLM 輸出驗證及資料契約；n8n 只負責人工編排和外部交付。此專案**沒有排程、Database 或常駐 API**。
+
+## Quick Start
+
+需要 Python 3.12。以下流程在一般網路環境約五分鐘完成；執行 Demo 本身不連外：
 
 ```bash
+git clone https://github.com/3pwei/commerce-competitive-intelligence.git
+cd commerce-competitive-intelligence
 python -m venv .venv
-source .venv/bin/activate  # Windows PowerShell: .venv\\Scripts\\Activate.ps1
-python -m pip install --upgrade pip
+source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-python -m competitive_intelligence --help
+python -m competitive_intelligence demo-run \
+  --mode fixture --provider mock --output-dir output/demo
 ```
 
-執行與 CI 相同的檢查：
+檢查 `output/demo/validation_report.json` 的 `status` 是否為 `passed`，並用瀏覽器開啟 `output/demo/email_preview.html`。六張 Sheet 的 JSON／CSV 位於 `output/demo/sheets/`。
+
+## Demo Walkthrough
+
+安全預設等同 `fixture + mock + dry-run`：
 
 ```bash
-python -m ruff check .
-python -m ruff format --check .
+# 僅重播商品頁 fixture
+python -m competitive_intelligence capture --mode fixture
+
+# 完整離線 Demo；產生 bundle、六張 Sheet、summary、validation、evidence 與 Email preview
+python -m competitive_intelligence demo-run \
+  --mode fixture --provider mock --output-dir output/demo
+
+# 執行與 CI 相同的品質檢查
+python -m ruff check . && python -m ruff format --check .
 python -m mypy src
 python -m pytest --cov=competitive_intelligence --cov-report=term-missing --cov-fail-under=85
 python -m pip_audit .
 ```
 
-CI 僅使用 Python 3.12，於 pull request 與 `master` push 執行 lint、format、type check、
-完整測試、85% coverage gate、dependency audit 與 secret scan。測試以全域 socket guard
-禁止網路連線；端到端驗證固定使用 fixture + mock，不需要 repository secrets，也不呼叫
-真實 retailer、LLM、Google Sheets 或 Gmail。
+可直接檢視已提交的 [`examples/demo`](examples/demo) sanitized 結果。逐步操作、n8n 匯入、Google Sheets／Gmail 選用設定及復原方式見 [`docs/demo-runbook.md`](docs/demo-runbook.md)。
 
-## 安全限制
+## Google Sheets Schema
 
-- `.env`、credentials、本機資料、live capture 與執行產物均由 `.gitignore` 排除。
-- fixture 必須是 synthetic／sanitized，不得含 token、Email、Sheet ID 或真實識別資訊。
-- n8n JSON 只保留 Manual Trigger；Sheet URL 從 `GOOGLE_SHEET_URL` 環境變數注入。
-- Google Sheets 與 Gmail credentials 只能在 n8n 執行環境中設定，不得匯出至版本庫。
-- Dependabot 僅追蹤 Python 與 GitHub Actions dependencies。
+| Sheet | 用途 |
+|---|---|
+| STG | 保留 parser observation 與批次 SEQN |
+| ODS | 驗證、正規化及去重後的觀測資料 |
+| TGT | 加入自有價格與前後庫存狀態的業務資料 |
+| Comment | 經驗證的評論優缺點與摘要 |
+| Overall Trend | 確定性事件與觀察結果 |
+| Recent Suggestion | 僅以已確認事件為依據的營運建議 |
 
-## 目錄
+欄位名稱、大小寫與順序以 [`config/sheet-schema.v1.json`](config/sheet-schema.v1.json) 為唯一依據，本版本不更動既有 schema。映射與對帳規則見 [`docs/data-contracts.md`](docs/data-contracts.md)。
+
+## Optional Integrations
+
+- **Google Sheets**：在 n8n runtime 設定 `GOOGLE_SHEET_URL`，並在 n8n UI 指派 OAuth2 credential；repository 不保存 Sheet ID 或 credential。
+- **Gmail**：在 n8n UI 指派 Gmail OAuth2 credential，填入收件人後，刻意關閉 dry-run 並啟用 `sendEmail`。
+- **One-time live capture**：人工執行 `python -m competitive_intelligence capture --mode live`。原始結果只寫入被忽略的 `fixtures/live/`，不得直接提交。
+
+外部整合不是 Quick Start 的必要條件，也不會在 CI 中執行。
+
+## Testing & Security
+
+CI 在 pull request 與 `master` push 執行 Ruff、Mypy、完整 pytest、85% coverage gate、dependency audit、離線端到端 Demo 與 Gitleaks。測試透過 socket guard 阻擋網路連線，且不使用 repository secrets。`.env`、credentials、cookies、live captures 及本機輸出都由 `.gitignore` 排除。
+
+## Project Structure
 
 ```text
-config/                         Demo 設定範例
-docs/                           設計與使用文件
-fixtures/                       已清理的測試資料
-n8n/workflows/                  後續可匯入的 workflow JSON
-src/competitive_intelligence/   Python package
-tests/                          自動測試
+config/                         版本化 Sheet／產品／規則設定
+docs/                           架構、runbook 與工程決策
+examples/demo/                  可公開重現的 sanitized Demo 結果
+fixtures/                       synthetic 商品頁與評論
+n8n/workflows/                  Manual Trigger workflow JSON
+src/competitive_intelligence/   可測試的 Python 核心與 Adapter
+tests/                          unit、contract、integration 與 security tests
 ```
 
-## 資料契約與產品設定
+技術選型刻意保持小而可驗證：Python 3.12、Pydantic v2、Beautiful Soup、pytest、n8n 與 Google Sheets。檔案型 artifacts 足以支援人工 Demo，因此沒有引入資料庫、queue 或 web server。
 
-現有 Google Sheet 的六張工作表已定義為版本化、大小寫敏感的資料契約；三項 Demo 產品的價格與 retailer URL 則集中於非敏感設定檔。詳見 [`docs/data-contracts.md`](docs/data-contracts.md)。此階段只載入與驗證本機設定，不連線或寫入 Google Sheets。
+## Design Decisions
 
-## 網頁擷取與解析邊界
+- **規則先於 LLM**：價格／庫存事件由確定性規則判斷，LLM 不重新判斷事實。
+- **Adapter 邊界**：fetcher、LLM、Sheets 與 Email 可以替換，不讓核心邏輯綁定供應商。
+- **Append-only 交付**：n8n 先檢查 SEQN，再依序 append；不清空既有 Sheet。
+- **Offline-first**：公開 fixture 同時支援開發、CI、面試展示與問題重現。
+- **檔案而非 Database**：v1 是人工、單次執行的作品集 Demo，避免不必要的營運複雜度。
 
-`PageFetcher` 將 direct HTTP、未來 browser／scraping API 與離線 fixture 隔離；Amazon、Walmart、Best Buy parser 只處理傳入的 HTML，依 JSON-LD、meta、retailer DOM 的順序抽取證據，不執行 JavaScript，也不猜測缺失的價格或庫存。CI 僅使用最小 synthetic HTML。
+## Limitations
 
-## STG / ODS / TGT 離線管線
+- 展示資料不是即時市場資訊，retailer DOM 改版可能需要更新 parser。
+- configured LLM、Google Sheets、Gmail 與 live capture 需要使用者自行提供服務及 credentials。
+- 沒有自動排程、Database、訊息佇列、Dashboard、常駐 API、重試服務或 Production SLA。
+- 建議供人工判讀，不會自動改價、下架商品或對外發送通知。
 
-Fixture replay 可直接轉換為符合既有 Sheet schema 的 STG、ODS 與 TGT JSON/CSV 檔案；
-流程會驗證、正規化、去除完全重複資料並保留 rejected audit，不連線 Google Sheets：
+## Future Improvements
 
-```bash
-python -m competitive_intelligence pipeline --mode fixture --output-dir output/demo
-```
+- 增加受控的排程、歷史儲存與趨勢 Dashboard。
+- 加入更多 retailer／產品與 parser drift monitoring。
+- 強化人工核准、重試、idempotency 與 Production observability。
+- 對真實成效建立 recommendation feedback loop。
 
-完整規則與對帳方式見 [`docs/data-pipeline.md`](docs/data-pipeline.md)。
+## Release
 
-## 評論分析
+版本為 `1.0.0`。變更紀錄見 [`CHANGELOG.md`](CHANGELOG.md)，發布說明草稿見 [`docs/releases/v1.0.0.md`](docs/releases/v1.0.0.md)。本 PR 不建立 tag 或 GitHub Release。
 
-```bash
-python -m competitive_intelligence reviews --mode fixture --provider mock
-```
+## License
 
-The default review flow replays sanitized Amazon fixtures and uses a deterministic mock
-provider. See `docs/review-analysis.md` for provider configuration and safety limits.
-
-## Comment Sheet 離線輸出
-
-```bash
-python -m competitive_intelligence comment-output \
-  --mode fixture --provider mock --output-dir output/demo
-```
-
-此命令產生嚴格符合既有 `Comment` schema 的 JSON/CSV，以及獨立的 evidence 與
-summary sidecar；不連線或修改 Google Sheets。完整欄位映射與 SEQN 傳遞方式見
-[`docs/comment-output.md`](docs/comment-output.md)。
-
-## Overall Trend 確定性規則
-
-```bash
-python -m competitive_intelligence overall-trend \
-  --tgt output/demo/tgt.json \
-  --comment output/demo/comment.json \
-  --output-dir output/demo
-```
-
-此命令以價格、庫存及已驗證的 Comment evidence 執行確定性規則，產生符合
-`Overall Trend` schema 的 JSON/CSV 與事件 sidecar；不呼叫 scraper、LLM 或 Google Sheets。
-規則與追溯欄位見 [`docs/business-rules.md`](docs/business-rules.md)。
-
-## AI 營運建議
-
-```bash
-python -m competitive_intelligence recommendations \
-  --trend output/demo/overall_trend.json \
-  --events output/demo/detected_events.json \
-  --provider mock \
-  --output-dir output/demo
-```
-
-此命令只根據 PR #8 已確認的事件產生人工作業建議，輸出符合 `Recent Suggestion`
-schema 的 JSON/CSV 及 evidence/summary sidecar。Mock 模式完全離線且可重現；任何建議
-都不會直接調價、通知或修改外部系統。詳見 [`docs/recommendations.md`](docs/recommendations.md)。
-
-## n8n 端到端 Demo
-
-```bash
-python -m competitive_intelligence demo-run \
-  --mode fixture --provider mock --output-dir output/demo
-```
-
-命令會產生單一 `demo_bundle.json`，並在任何外部步驟前完成六張 Sheet contract 驗證與
-Email preview。可匯入的人工 workflow、dry-run、SEQN 重複保護及 credentials 設定方式見
-[`docs/n8n-integration.md`](docs/n8n-integration.md)。
-
-## 尚未實作
-
-部署、自動排程、Database、Dashboard 與常駐 API 不在此 Demo 範圍。
+MIT，詳見 [`LICENSE`](LICENSE)。

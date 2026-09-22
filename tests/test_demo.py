@@ -34,6 +34,14 @@ def test_demo_run_writes_one_reconciled_bundle(tmp_path: Path, capsys) -> None:
         assert payload["run_summary"]["sheet_row_counts"][sheet] == len(payload[key])
     assert payload["email_content"]["html"].startswith("<h1>")
     assert payload["seqn"] in payload["email_content"]["subject"]
+    for slug in ("stg", "ods", "tgt", "comment", "overall_trend", "recent_suggestion"):
+        assert (tmp_path / "sheets" / f"{slug}.json").is_file()
+        assert (tmp_path / "sheets" / f"{slug}.csv").is_file()
+    report = json.loads((tmp_path / "validation_report.json").read_text(encoding="utf-8"))
+    assert report["status"] == "passed"
+    assert report["cross_sheet_reconciliation"] == "passed"
+    assert (tmp_path / "email_preview.html").is_file()
+    assert (tmp_path / "email_preview.txt").is_file()
     assert '"bundle"' in capsys.readouterr().out
 
 
