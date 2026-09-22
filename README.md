@@ -26,7 +26,8 @@ Commerce Competitive Intelligence 是可公開重現的電商競品情報 Demo�
 - 評論的正規化、去重與結構化 mock／configured LLM 分析。
 - 價格、庫存、評論風險事件與 evidence sidecars。
 - 六張 Sheet contract、Google Sheets append、防重複 SEQN 與 Email preview。
-- Manual Trigger-only n8n workflow；預設 fixture + mock + dry-run。
+- Manual Trigger-only n8n workflow；預設 fixture + mock + dry-run，並在畫布顯示 HTML parser、
+  LLM review analysis、business rules 與 recommendation stage checkpoints。
 
 ## Architecture
 

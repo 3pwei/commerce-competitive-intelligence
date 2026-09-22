@@ -90,6 +90,33 @@ def test_exported_workflow_is_manual_safe_and_credential_free() -> None:
     assert "Execution Summary" in serialized
 
 
+def test_workflow_surfaces_python_business_stages_as_fail_closed_checkpoints() -> None:
+    workflow = json.loads(WORKFLOW.read_text(encoding="utf-8"))
+    nodes = {node["name"]: node for node in workflow["nodes"]}
+    expected = (
+        "Collect / Replay Product Pages",
+        "Parse Retailer HTML",
+        "Build STG / ODS / TGT",
+        "Collect / Replay Reviews",
+        "Analyze Recent Reviews with LLM",
+        "Apply Business Rules",
+        "Generate AI Recommendations",
+    )
+    for name in expected:
+        node = nodes[name]
+        assert node["type"] == "n8n-nodes-base.code"
+        assert "throw new Error" in node["parameters"]["jsCode"]
+        assert node["notesInFlow"] is True
+        assert node["notes"].startswith("Python stage checkpoint:")
+
+    connections = workflow["connections"]
+    previous = "Parse Demo Bundle"
+    for name in expected:
+        assert connections[previous]["main"][0][0]["node"] == name
+        previous = name
+    assert connections[previous]["main"][0][0]["node"] == "Validate Output Bundle"
+
+
 def test_workflow_command_matches_demo_cli_contract() -> None:
     workflow = json.loads(WORKFLOW.read_text(encoding="utf-8"))
     command = next(

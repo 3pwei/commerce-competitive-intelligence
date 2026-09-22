@@ -19,11 +19,26 @@ stores `fixtureMode`, `mockLlm`, and `dryRun` as actual `true` Booleans, and `wr
 
 ```text
 Manual Trigger -> Select Demo Options -> Execute Python Demo Pipeline
+-> Read and Parse Demo Bundle
+-> Collect / Replay Product Pages [checkpoint]
+-> Parse Retailer HTML [checkpoint]
+-> Build STG / ODS / TGT [checkpoint]
+-> Collect / Replay Reviews [checkpoint]
+-> Analyze Recent Reviews with LLM [checkpoint]
+-> Apply Business Rules [checkpoint]
+-> Generate AI Recommendations [checkpoint]
 -> Validate Output Bundle -> Sheets Dry-Run -> Build Email Preview -> Execution Summary
 ```
 
 The fixed command runs from `/opt/competitive-intelligence` and writes to `/demo-output`. The
 default path does not call Google, Gmail, an LLM, or retailer sites and requires no credentials.
+
+The seven named Code nodes are fail-closed stage checkpoints, not duplicate implementations of the
+Python business logic. `Execute Python Demo Pipeline` owns collection/replay, retailer HTML parsing,
+review-source normalization, LLM-provider invocation, deterministic rules, and recommendations.
+Each checkpoint makes that boundary visible on the n8n canvas and verifies the corresponding bundle
+output before delivery continues. The offline path uses saved HTML/review fixtures and the
+deterministic mock LLM; configured live adapters remain explicit opt-in boundaries.
 
 ## Execute Command boundary
 

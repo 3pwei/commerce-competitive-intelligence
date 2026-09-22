@@ -62,6 +62,90 @@
     },
     {
       "parameters": {
+        "jsCode": "const b=$json.data; if(!Array.isArray(b?.stg_rows)||b.stg_rows.length===0) throw new Error('Product page replay produced no observations'); return [{json:$json}];"
+      },
+      "id": "checkpoint-product-pages",
+      "name": "Collect / Replay Product Pages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, -1400],
+      "notesInFlow": true,
+      "notes": "Python stage checkpoint: fixture replay is the safe default; an explicit one-time live capture uses the PageFetcher adapter boundary."
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$json.data?.stg_rows; const fields=['Product Name','Vendor','Base Price','Final Price','Stock Status']; if(!Array.isArray(rows)||rows.some(row=>fields.some(field=>!(field in row)))) throw new Error('Retailer parser output is missing required fields'); return [{json:$json}];"
+      },
+      "id": "checkpoint-retailer-parser",
+      "name": "Parse Retailer HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, -1200],
+      "notesInFlow": true,
+      "notes": "Python stage checkpoint: retailer-specific parsers convert saved or captured HTML into normalized product observations."
+    },
+    {
+      "parameters": {
+        "jsCode": "const b=$json.data; for(const key of ['stg_rows','ods_rows','tgt_rows']) if(!Array.isArray(b?.[key])||b[key].length===0) throw new Error(`Missing pipeline output: ${key}`); return [{json:$json}];"
+      },
+      "id": "checkpoint-data-pipeline",
+      "name": "Build STG / ODS / TGT",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, -1000],
+      "notesInFlow": true,
+      "notes": "Python stage checkpoint: parser observations are validated, normalized, deduplicated, and transformed into the three price and stock layers."
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$json.data?.comment_rows; if(!Array.isArray(rows)||rows.length===0) throw new Error('Review replay and normalization produced no Comment rows'); return [{json:$json}];"
+      },
+      "id": "checkpoint-reviews",
+      "name": "Collect / Replay Reviews",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, -800],
+      "notesInFlow": true,
+      "notes": "Python stage checkpoint: the review source loads, normalizes, deduplicates, and limits recent reviews before analysis."
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$json.data?.comment_rows; const fields=['Pros1','Cons1','Summary']; if(!Array.isArray(rows)||rows.some(row=>fields.some(field=>!(field in row)))) throw new Error('Structured LLM review analysis is missing'); return [{json:$json}];"
+      },
+      "id": "checkpoint-llm-review-analysis",
+      "name": "Analyze Recent Reviews with LLM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, -600],
+      "notesInFlow": true,
+      "notes": "Python stage checkpoint: the LLM Provider produces validated pros, cons, and summaries. Offline Demo and CI use the deterministic mock provider."
+    },
+    {
+      "parameters": {
+        "jsCode": "const b=$json.data; if(!Array.isArray(b?.overall_trend_rows)||!Array.isArray(b?.detected_events)) throw new Error('Business rule outputs are missing'); return [{json:$json}];"
+      },
+      "id": "checkpoint-business-rules",
+      "name": "Apply Business Rules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, -400],
+      "notesInFlow": true,
+      "notes": "Python stage checkpoint: deterministic rules establish price, stock, and review-risk facts before recommendation generation."
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$json.data?.recent_suggestion_rows; if(!Array.isArray(rows)||rows.length===0) throw new Error('AI recommendation output is missing'); return [{json:$json}];"
+      },
+      "id": "checkpoint-ai-recommendations",
+      "name": "Generate AI Recommendations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, -200],
+      "notesInFlow": true,
+      "notes": "Python stage checkpoint: recommendations are evidence-bound and cannot redefine price or stock facts."
+    },
+    {
+      "parameters": {
         "jsCode": "const b=$json.data; const o=$('Select Demo Options').first().json; const required={stg_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','Stock Status','Timestamp','SEQN'],ods_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','Stock Status','Timestamp','SEQN'],tgt_rows:['Item Number','Product Name','Vendor','Base Price','Final Price','My price','Recent Stock','Current Stock','Timestamp'],comment_rows:['Product Name','Vendor','Pros1','Pros2','Pros3','Cons1','Cons2','Cons3','Summary'],overall_trend_rows:['Product Name','Vendor','Overall Trend','Observation'],recent_suggestion_rows:['Product Name','Vendor','Suggestion']}; if(!b.seqn||b.run_summary?.seqn!==b.seqn) throw new Error('Invalid bundle SEQN'); for(const [key,headers] of Object.entries(required)){if(!Array.isArray(b[key])) throw new Error(`Missing ${key}`); for(const row of b[key]) if(JSON.stringify(Object.keys(row))!==JSON.stringify(headers)) throw new Error(`Schema mismatch: ${key}`);} return [{json:{...b,options:o}}];"
       },
       "id": "validate-bundle",
@@ -246,7 +330,14 @@
     "Select Demo Options": {"main": [[{"node": "Execute Python Demo Pipeline", "type": "main", "index": 0}]]},
     "Execute Python Demo Pipeline": {"main": [[{"node": "Read Demo Bundle", "type": "main", "index": 0}]]},
     "Read Demo Bundle": {"main": [[{"node": "Parse Demo Bundle", "type": "main", "index": 0}]]},
-    "Parse Demo Bundle": {"main": [[{"node": "Validate Output Bundle", "type": "main", "index": 0}]]},
+    "Parse Demo Bundle": {"main": [[{"node": "Collect / Replay Product Pages", "type": "main", "index": 0}]]},
+    "Collect / Replay Product Pages": {"main": [[{"node": "Parse Retailer HTML", "type": "main", "index": 0}]]},
+    "Parse Retailer HTML": {"main": [[{"node": "Build STG / ODS / TGT", "type": "main", "index": 0}]]},
+    "Build STG / ODS / TGT": {"main": [[{"node": "Collect / Replay Reviews", "type": "main", "index": 0}]]},
+    "Collect / Replay Reviews": {"main": [[{"node": "Analyze Recent Reviews with LLM", "type": "main", "index": 0}]]},
+    "Analyze Recent Reviews with LLM": {"main": [[{"node": "Apply Business Rules", "type": "main", "index": 0}]]},
+    "Apply Business Rules": {"main": [[{"node": "Generate AI Recommendations", "type": "main", "index": 0}]]},
+    "Generate AI Recommendations": {"main": [[{"node": "Validate Output Bundle", "type": "main", "index": 0}]]},
     "Validate Output Bundle": {"main": [[{"node": "Dry Run or Sheets Disabled", "type": "main", "index": 0}]]},
     "Dry Run or Sheets Disabled": {"main": [[{"node": "Sheets Dry-Run", "type": "main", "index": 0}], [{"node": "Read Existing STG SEQN", "type": "main", "index": 0}]]},
     "Sheets Dry-Run": {"main": [[{"node": "Build Email Preview", "type": "main", "index": 0}]]},
