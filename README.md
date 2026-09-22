@@ -85,6 +85,17 @@ python -m competitive_intelligence reviews --mode fixture --provider mock
 The default review flow replays sanitized Amazon fixtures and uses a deterministic mock
 provider. See `docs/review-analysis.md` for provider configuration and safety limits.
 
+## Comment Sheet 離線輸出
+
+```bash
+python -m competitive_intelligence comment-output \
+  --mode fixture --provider mock --output-dir output/demo
+```
+
+此命令產生嚴格符合既有 `Comment` schema 的 JSON/CSV，以及獨立的 evidence 與
+summary sidecar；不連線或修改 Google Sheets。完整欄位映射與 SEQN 傳遞方式見
+[`docs/comment-output.md`](docs/comment-output.md)。
+
 ## 尚未實作
 
 Google Sheets API 與實際寫入、整體趨勢與營運建議、n8n workflow、Email、部署及任何排程均留待後續 PR。
