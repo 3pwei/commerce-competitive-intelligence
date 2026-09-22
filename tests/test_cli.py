@@ -19,3 +19,18 @@ def test_reviews_cli_defaults_to_offline_mock(capsys: pytest.CaptureFixture[str]
 
     assert result == 0
     assert '"provider": "mock"' in capsys.readouterr().out
+
+
+def test_comment_output_cli_writes_all_artifacts(
+    tmp_path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    result = main(["comment-output", "--output-dir", str(tmp_path), "--seqn", "cli-seqn"])
+
+    assert result == 0
+    assert {path.name for path in tmp_path.iterdir()} == {
+        "comment.json",
+        "comment.csv",
+        "comment_evidence.json",
+        "comment_summary.json",
+    }
+    assert '"seqn": "cli-seqn"' in capsys.readouterr().out
