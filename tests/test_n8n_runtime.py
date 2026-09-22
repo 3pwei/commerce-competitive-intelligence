@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from competitive_intelligence.cli import main
-from scripts.validate_n8n_runtime import validate
+from competitive_intelligence.runtime_validation import validate_n8n_runtime
 
 ROOT = Path(__file__).parents[1]
 
@@ -27,7 +27,7 @@ def test_runtime_validator_checks_real_outputs(tmp_path: Path) -> None:
     execution.write_text(
         '{"status":"completed","executionId":"test-execution-19"}\n', encoding="utf-8"
     )
-    report = validate(tmp_path, execution)
+    report = validate_n8n_runtime(tmp_path, execution)
     assert report["status"] == "passed"
     assert report["execution_id"] == "test-execution-19"
     assert json.loads((tmp_path / "runtime-smoke-report.json").read_text())["status"] == "passed"
